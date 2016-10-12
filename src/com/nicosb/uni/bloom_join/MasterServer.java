@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -16,9 +17,10 @@ public class MasterServer implements Server{
 	public static final char CHAR_BLOOMFILTER = 'b';
 	public static final char CHAR_TUPLES = 't';
 	public static final char CHAR_TERMINATE = 'q';
-	public static final char CHAR_REGISTER = 'q';
+	public static final char CHAR_REGISTER = 'r';
 	
 	private Connection conn;
+	private HashMap<Integer, Socket> socketMap = new HashMap<>();
 
 	public MasterServer(){
 		try {
@@ -38,37 +40,35 @@ public class MasterServer implements Server{
 		}
 		
 	}
+	
 	@Override
 	public void run(String hostName, int port) {
 		try {
 			ServerSocket masterSocket = new ServerSocket(port);
 			System.out.println("master server started on port " + masterSocket.getLocalPort());
 			
-			// This thread listens for registrations from other servers
-			new Runnable(){
 
+			// This thread listens for registrations from other servers
+			class ConnectionListener implements Runnable{
+				MasterServer master;
+				ConnectionListener(MasterServer master){ this.master = master; }
 				@Override
 				public void run() {
 					while(true){
+						Socket slaveSocket;
 						try {
-							Socket slaveSocket = masterSocket.accept();
-							DataInputStream input = new DataInputStream(slaveSocket.getInputStream());
-							while(input.available() < 1){
-								input = new DataInputStream(slaveSocket.getInputStream());
-							}
-							
-							String tables = input.readUTF();
-							registerServer(port, tables);
+							slaveSocket = masterSocket.accept();
+							SlaveHandler sh = new SlaveHandler(slaveSocket, master);
+							new Thread(sh).start();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-							
 					}
 				}
-				
 			};
 			
+			new Thread(new ConnectionListener(this)).start();;
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -83,33 +83,29 @@ public class MasterServer implements Server{
 			String query = s.nextLine();
 			try {
 				QueryInformation qi = new QueryInformation(query);
-				qi.getTables();
+				QueryEvaluator.evaluate(qi, this);
 			} catch (InvalidQueryException e) {
 				System.out.println("ERROR: Invalid input!");
 			}
 		}
 	}
 
+		
 	/**
-	 * <pre> tables contains the tables of a server separated by ';'
-	 * @param port the server's port, serves as an identifier in a local environment
-	 * @param tables the string containing the server's table's separated by ';'
 	 * 
-	 * registers the server by inserting its properties into the master's register
+	 * @param port the server's port
+	 * @return the corresponding socket or null if there is none.
 	 */
-	protected void registerServer(int port, String tables) {
-		String[] tables_split = tables.split(";");
-		try {
-			PreparedStatement prep = conn.prepareStatement("INSERT INTO slave_tables(server_id, table_name) VALUES(" + port + ", ?)");
-
-			for(String t: tables_split){
-				prep.setString(1, t);
-				prep.execute();
-			}
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+	public Socket getSocket(int port){
+		return socketMap.get(port);
 	}
 	
+	public void putSocket(int slavePort, Socket slaveSocket) {
+		socketMap.put(slavePort, slaveSocket);
+	}
+
+	public int getSocketCount() {
+		// TODO Auto-generated method stub
+		return socketMap.size();
+	}
 }
