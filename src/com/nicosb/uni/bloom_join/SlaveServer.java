@@ -30,7 +30,7 @@ public class SlaveServer implements Server {
 	      try{
 		      masterSocket = new Socket(masterHostName, masterPort);
 		      DataOutputStream output = new DataOutputStream(masterSocket.getOutputStream());
-		      output.writeChar(MasterServer.CHAR_REGISTER);
+		      output.writeUTF(""+MasterServer.CHAR_REGISTER);
 		     
 		      System.out.println("Connected to master on port " + masterPort);
 		      // register with covered tables
@@ -75,6 +75,8 @@ public class SlaveServer implements Server {
 			props.setProperty("user", System.getenv("DB_USER"));
 			props.setProperty("password", System.getenv("DB_PASSWORD"));
 			
+			String table = query.substring(query.indexOf("FROM ") + "FROM ".length());
+			
 			Connection conn = DriverManager.getConnection(url, props);
 			PreparedStatement prep = conn.prepareStatement(query);
 			ResultSet rs = prep.executeQuery();
@@ -84,13 +86,15 @@ public class SlaveServer implements Server {
 			}
 			BitSet bs = Bloomer.bloom(int_ll, k, m);
 			byte[] b = bs.toByteArray();
-			for(byte by: b){
-				System.out.print(Integer.toBinaryString(by));
-			}
+			output.writeUTF("b;t="+table);
+			output.write(b);
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

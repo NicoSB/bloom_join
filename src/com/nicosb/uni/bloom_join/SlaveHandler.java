@@ -7,23 +7,26 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Properties;
 
 public class SlaveHandler implements Runnable {
 	private Socket slaveSocket;
 	private MasterServer master;
 	private Connection conn;
+	private int id;
 	
 	
 	public SlaveHandler(Socket slaveSocket, MasterServer master) {
 		super();
 		this.slaveSocket = slaveSocket;
-		this.master = master;		
+		this.master = master;
+		id = master.getSocketCount();
 	}
 
 	@Override
 	public void run() {
-		System.out.println("handler started for slave id=" + master.getSocketCount());
+		System.out.println("handler started for slave id=" + id);
 		do{
 			try {
 				DataInputStream input = new DataInputStream(slaveSocket.getInputStream());
@@ -32,15 +35,26 @@ public class SlaveHandler implements Runnable {
 				while(input.available() < 1){
 					input = new DataInputStream(slaveSocket.getInputStream());
 				}
-				char c = input.readChar();
-				System.out.println("received message from slave " + master.getSocketCount() + "(" + c + ")");
+				String header = input.readUTF();
+				char c = header.charAt(0);
+				System.out.println("received message from slave " + id + "(" + c + ")");
 				switch(c){
-					case 'r':
+					case MasterServer.CHAR_REGISTER:
 						String tables = input.readUTF();
 						if(registerServer(slavePort, tables)){
 							master.putSocket(master.getSocketCount(), slaveSocket);
-							System.out.println("registered slave with port: " + slavePort);
+							System.out.println("registered slave #" + id);
 						}
+						break;
+					case MasterServer.CHAR_BLOOMFILTER:
+						byte b[] = new byte[100];
+						int l = input.read(b);
+						System.out.println("received bloom filter from " + id + " for table " + header.substring(header.indexOf("t=")+"t=".length()));
+						for(int i = 0; i < l; i++){
+							System.out.print(Integer.toBinaryString(b[i]));
+						}
+						System.out.print("\n");
+						break;
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
