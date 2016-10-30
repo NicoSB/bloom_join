@@ -69,6 +69,7 @@ public class SlaveServer implements Server {
 
 	private void send(DataOutputStream output, String query, int k, int m) {
 		try {
+			System.out.println("executing " + query);
 			Class.forName("org.postgresql.Driver");
 			String url = "jdbc:postgresql://localhost/bloom_join";
 			Properties props = new Properties();
@@ -82,7 +83,7 @@ public class SlaveServer implements Server {
 			ResultSet rs = prep.executeQuery();
 			LinkedList<Integer> int_ll = new LinkedList<>();
 			while(rs.next()){
-				int_ll.add(rs.getInt(1));
+				int_ll.add(getStrScore(rs.getString(1)));
 			}
 			BitSet bs = Bloomer.bloom(int_ll, k, m);
 			byte[] b = bs.toByteArray();
@@ -98,5 +99,13 @@ public class SlaveServer implements Server {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	private Integer getStrScore(String string) {
+		int score = 0;
+		for(int i = 0; i < string.length(); i++){
+			score += (int)string.charAt(i);
+		}
+		return score;
 	}
 }	

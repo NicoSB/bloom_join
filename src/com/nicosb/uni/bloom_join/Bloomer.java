@@ -36,7 +36,6 @@ public class Bloomer{
 	public static BitSet bloom(int[] ints, int k, int m){
 
 		BitSet bitset = new BitSet(m);
-		bitset.clear();
 
 		for(int i: ints){
 			for(int j = 0; j < k; j++){
@@ -48,7 +47,6 @@ public class Bloomer{
 	public static BitSet bloom(LinkedList<Integer> ints, int k, int m){
 
 		BitSet bitset = new BitSet(m);
-		bitset.clear();
 
 		for(int i: ints){
 			for(int j = 0; j < k; j++){
@@ -59,6 +57,7 @@ public class Bloomer{
 	}
 
 	private static int hash(int value, int i, int m){
+		// TODO: replace with Murmur hash
 		return (value*i)%m;
 	}
 

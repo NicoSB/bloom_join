@@ -21,15 +21,17 @@ public class MasterServer implements Server{
 	
 	private Connection conn;
 	private HashMap<Integer, Socket> socketMap = new HashMap<>();
+	public BloomProcessor activeProcessor;
 
 	public MasterServer(){
 		try {
 			Class.forName("org.postgresql.Driver");
-			String url = "jdbc:postgresql://localhost/";
+			String url = "jdbc:postgresql://localhost/bloom_join";
 			Properties props = new Properties();
 			props.setProperty("user", System.getenv("DB_USER"));
 			props.setProperty("password", System.getenv("DB_PASSWORD"));
 			conn = DriverManager.getConnection(url, props);
+			conn.createStatement().executeUpdate("TRUNCATE TABLE sitetables");
 			
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block

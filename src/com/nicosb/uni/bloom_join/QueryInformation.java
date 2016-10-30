@@ -30,12 +30,12 @@ public class QueryInformation {
 			m = p.matcher(attributesSubstring); 
 			if(m.find()){
 				String attr = m.group();
-				attrs.put(attr, attr.substring(0, attr.indexOf(".")));
+				attrs.put(attr.substring(0, attr.indexOf(".")), attr.substring(attr.indexOf(".")+1));
 				attributesSubstring = attributesSubstring.substring(attributesSubstring.indexOf("=") + 1).trim();
 				m = p.matcher(attributesSubstring);
 				if(m.find()){
 					attr = m.group();
-					attrs.put(attr, attr.substring(0, attr.indexOf(".")));
+					attrs.put(attr.substring(0, attr.indexOf(".")), attr.substring(attr.indexOf(".")+1));
 				}
 			}
 		}

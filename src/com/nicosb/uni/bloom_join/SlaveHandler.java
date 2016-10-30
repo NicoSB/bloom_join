@@ -7,7 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Properties;
 
 public class SlaveHandler implements Runnable {
@@ -47,13 +47,25 @@ public class SlaveHandler implements Runnable {
 						}
 						break;
 					case MasterServer.CHAR_BLOOMFILTER:
-						byte b[] = new byte[100];
+						byte b[] = new byte[1000];
 						int l = input.read(b);
-						System.out.println("received bloom filter from " + id + " for table " + header.substring(header.indexOf("t=")+"t=".length()));
+						String table = header.substring(header.indexOf("t=")+"t=".length());
+						System.out.println("received bloom filter from " + id + " for table " + table);
+						System.out.println(b.length);
 						for(int i = 0; i < l; i++){
-							System.out.print(Integer.toBinaryString(b[i]));
+							System.out.print(String.format("%8s", Integer.toBinaryString(b[i] & 0xFF)).replace(' ', '0'));
 						}
 						System.out.print("\n");
+
+						BitSet result;
+						if((result = master.activeProcessor.ORJoin(table, id, b)) != null){
+							System.out.println("Joined all bloom filters: ");	
+							byte[] byteArray = result.toByteArray();
+							for(int i = 0; i < byteArray.length; i++){
+								System.out.print(String.format("%8s", Integer.toBinaryString(byteArray[i] & 0xFF)).replace(' ', '0'));
+							}
+						}
+						
 						break;
 				}
 			} catch (IOException e) {

@@ -37,12 +37,16 @@ public class QueryEvaluator {
 			}
 			
 			ResultSet rs = prep.executeQuery();
+			master.activeProcessor = new BloomProcessor(qi.getTables());
+			
 			while(rs.next()){
 				Socket slave = master.getSocket(rs.getInt(1));
 				if(slave != null){
+					master.activeProcessor.addRequested(rs.getString(2), rs.getInt(1));
 					DataOutputStream out = new DataOutputStream(slave.getOutputStream());
-					out.writeUTF("b;k=6,m=66");
-					out.writeUTF("SELECT DISTINCT id FROM " + rs.getString(2));
+					String attr = qi.getJoinAttributes().get(rs.getString(2));
+					out.writeUTF("b;k=6,m=640");
+					out.writeUTF("SELECT DISTINCT " + attr + " FROM " + rs.getString(2));
 				}
 			}
 		} catch (ClassNotFoundException e) {
