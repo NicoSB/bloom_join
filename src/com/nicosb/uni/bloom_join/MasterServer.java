@@ -1,6 +1,7 @@
 package com.nicosb.uni.bloom_join;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -8,6 +9,7 @@ import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Properties;
@@ -21,8 +23,11 @@ public class MasterServer implements Server{
 	
 	private Connection conn;
 	private HashMap<Integer, Socket> socketMap = new HashMap<>();
+	private ResultSet siteTables;
+	public QueryInformation cachedQuery;
 	public BloomProcessor activeProcessor;
-
+	
+	
 	public MasterServer(){
 		try {
 			Class.forName("org.postgresql.Driver");
@@ -46,6 +51,7 @@ public class MasterServer implements Server{
 	@Override
 	public void run(String hostName, int port) {
 		try {
+			@SuppressWarnings("resource")
 			ServerSocket masterSocket = new ServerSocket(port);
 			System.out.println("master server started on port " + masterSocket.getLocalPort());
 			
@@ -79,13 +85,14 @@ public class MasterServer implements Server{
 			e.printStackTrace();
 		}
 
+		@SuppressWarnings("resource")
 		Scanner s = new Scanner(System.in);
 		while(true){
 			System.out.print("psql>>>");
 			String query = s.nextLine();
 			try {
-				QueryInformation qi = new QueryInformation(query);
-				QueryEvaluator.evaluate(qi, this);
+				cachedQuery = new QueryInformation(query);
+				siteTables = QueryEvaluator.evaluate(cachedQuery, this);
 			} catch (InvalidQueryException e) {
 				System.out.println("ERROR: Invalid input!");
 			}
@@ -110,4 +117,29 @@ public class MasterServer implements Server{
 		// TODO Auto-generated method stub
 		return socketMap.size();
 	}
+	
+	public void sendBloomFilter(byte[] bloomfilter){
+		try {
+			siteTables.beforeFirst();
+			while(siteTables.next()){
+				Socket slave = getSocket(siteTables.getInt(1));
+				if(slave != null){
+					DataOutputStream out = new DataOutputStream(slave.getOutputStream());
+					out.writeUTF("t;k=6,m=2000");
+					String attr = cachedQuery.getJoinAttributes().get(siteTables.getString(2));
+					out.writeUTF("SELECT DISTINCT " + attr + " FROM " + siteTables.getString(2));
+					out.write(bloomfilter);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 }

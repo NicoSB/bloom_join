@@ -1,7 +1,8 @@
 package com.nicosb.uni.bloom_join;
 
-import java.io.DataInputStream;
+import java.io.ObjectInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,6 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.BitSet;
 import java.util.Properties;
+
+import com.sun.rowset.CachedRowSetImpl;
 
 public class SlaveHandler implements Runnable {
 	private Socket slaveSocket;
@@ -29,11 +32,11 @@ public class SlaveHandler implements Runnable {
 		System.out.println("handler started for slave id=" + id);
 		do{
 			try {
-				DataInputStream input = new DataInputStream(slaveSocket.getInputStream());
+				ObjectInputStream input = new ObjectInputStream(slaveSocket.getInputStream());
 	
 				int slavePort = slaveSocket.getLocalPort();
 				while(input.available() < 1){
-					input = new DataInputStream(slaveSocket.getInputStream());
+					input = new ObjectInputStream(slaveSocket.getInputStream());
 				}
 				String header = input.readUTF();
 				char c = header.charAt(0);
@@ -64,8 +67,21 @@ public class SlaveHandler implements Runnable {
 							for(int i = 0; i < byteArray.length; i++){
 								System.out.print(String.format("%8s", Integer.toBinaryString(byteArray[i] & 0xFF)).replace(' ', '0'));
 							}
+							master.sendBloomFilter(result.toByteArray());
 						}
-						
+					case MasterServer.CHAR_TUPLES:
+						try {
+							CachedRowSetImpl tuples = new CachedRowSetImpl();
+							tuples = (CachedRowSetImpl)input.readObject();
+							input.close();
+							tuples.beforeFirst();
+							while(tuples.next()){
+								System.out.print(tuples.getString(0) + tuples.getString(1));
+							}
+						} catch (SQLException | ClassNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 						break;
 				}
 			} catch (IOException e) {

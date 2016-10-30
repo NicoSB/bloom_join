@@ -13,7 +13,7 @@ import java.util.Properties;
 
 public class QueryEvaluator {
 
-	public static void evaluate(QueryInformation qi, MasterServer master){
+	public static ResultSet evaluate(QueryInformation qi, MasterServer master){
 		try {
 			Class.forName("org.postgresql.Driver");
 			String url = "jdbc:postgresql://localhost/bloom_join";
@@ -31,7 +31,7 @@ public class QueryEvaluator {
 			query = query.substring(0, query.length() - 1);
 			query += ")";
 			
-			prep = conn.prepareStatement(query);
+			prep = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			for(int i = 1; i  <= qi.getTables().length; i++){
 				prep.setString(i, qi.getTables()[i-1]);
 			}
@@ -45,10 +45,11 @@ public class QueryEvaluator {
 					master.activeProcessor.addRequested(rs.getString(2), rs.getInt(1));
 					DataOutputStream out = new DataOutputStream(slave.getOutputStream());
 					String attr = qi.getJoinAttributes().get(rs.getString(2));
-					out.writeUTF("b;k=6,m=640");
+					out.writeUTF("b;k=6,m=2000");
 					out.writeUTF("SELECT DISTINCT " + attr + " FROM " + rs.getString(2));
 				}
 			}
+			return rs;
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -59,7 +60,7 @@ public class QueryEvaluator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		return null;
 		
 	}
 }

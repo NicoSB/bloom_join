@@ -67,12 +67,19 @@ public class Bloomer{
 
 		for(int i = 0; i < k; i++){
 			if(!b.get(hash(value, i, m))){
-				System.out.println("" + value + " is not in the filter");
 				return false;
 			}
 		}
 
-		System.out.println("" + value + " could be in the filter");
+		return true;
+	}
+	public static boolean is_in(int value, BitSet b, int k, int m){	
+		for(int i = 0; i < k; i++){
+			if(!b.get(hash(value, i, m))){
+				return false;
+			}
+		}
+
 		return true;
 	}
 }
