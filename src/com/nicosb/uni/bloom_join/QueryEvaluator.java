@@ -1,7 +1,8 @@
 package com.nicosb.uni.bloom_join;
 
-import java.io.DataOutputStream;
+import java.io. OutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.Connection;
@@ -43,10 +44,10 @@ public class QueryEvaluator {
 				Socket slave = master.getSocket(rs.getInt(1));
 				if(slave != null){
 					master.activeProcessor.addRequested(rs.getString(2), rs.getInt(1));
-					DataOutputStream out = new DataOutputStream(slave.getOutputStream());
+					ObjectOutputStream out = master.getOStream(rs.getInt(1));
 					String attr = qi.getJoinAttributes().get(rs.getString(2));
-					out.writeUTF("b;k=6,m=2000");
-					out.writeUTF("SELECT DISTINCT " + attr + " FROM " + rs.getString(2));
+					out.writeObject("b;k=6,m=2000");
+					out.writeObject("SELECT DISTINCT " + attr + " FROM " + rs.getString(2));
 				}
 			}
 			return rs;

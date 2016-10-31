@@ -33,7 +33,7 @@ public class SlaveServer {
 	      try{
 		      masterSocket = new Socket(masterHostName, masterPort);
 		      ObjectOutputStream output = new ObjectOutputStream(masterSocket.getOutputStream());
-		      output.writeUTF(""+MasterServer.CHAR_REGISTER);
+		      output.writeObject(""+MasterServer.CHAR_REGISTER);
 		     
 		      System.out.println("Connected to master on port " + masterPort);
 		      // register with covered tables
@@ -42,18 +42,18 @@ public class SlaveServer {
 		    	  tablesString += s;
 		    	  tablesString += ";";
 		      }
-		      output.writeUTF(tablesString);
+		      output.writeObject(tablesString);
 		      ObjectInputStream input = new ObjectInputStream(masterSocket.getInputStream());
 		      do{	
-		    	String header = input.readUTF();
+		    	String header = (String)input.readObject();
+		    	
 		    	char c = header.charAt(0);
 		    	switch(c){
 					case MasterServer.CHAR_BLOOMFILTER:
 						int k = Integer.valueOf(header.substring(header.indexOf("k=")+2,header.indexOf(",")));
-						// , header.indexOf(header.indexOf(","))
 						int m = Integer.valueOf(header.substring(header.indexOf("m=")+2));
 						System.out.println("received bloom request from master with params (m=" + m + " k=" + k + ")");
-						send(output, input.readUTF(), k, m);
+						send(output, (String)input.readObject(), k, m);
 						output.flush();
 						break;
 					case MasterServer.CHAR_TUPLES:
@@ -61,9 +61,8 @@ public class SlaveServer {
 						int k_c = Integer.valueOf(header.substring(header.indexOf("k=")+2,header.indexOf(",")));
 						int m_c = Integer.valueOf(header.substring(header.indexOf("m=")+2));
 						
-						String query = input.readUTF();
-						byte[] bloomRequest = new byte[m_c];
-						input.read(bloomRequest);
+						String query = (String)input.readObject();
+						byte[] bloomRequest = (byte[])input.readObject();
 						
 						ArrayList<String> results = new ArrayList<>();
 						
@@ -108,7 +107,7 @@ public class SlaveServer {
 						CachedRowSetImpl cr = new CachedRowSetImpl();	
 						cr.populate(rs);
 						ObjectOutputStream out = new ObjectOutputStream(masterSocket.getOutputStream());
-						out.writeChar(MasterServer.CHAR_TUPLES);
+						out.writeObject(MasterServer.CHAR_TUPLES);
 						out.writeObject(cr);
 						break;
 					case MasterServer.CHAR_TERMINATE:
@@ -134,8 +133,7 @@ public class SlaveServer {
 			
 			Connection conn = DriverManager.getConnection(url, props);
 			PreparedStatement prep = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-
-			
+	
 			ResultSet cachedRS = prep.executeQuery();
 			cache.put(query, cachedRS);
 			
@@ -145,8 +143,8 @@ public class SlaveServer {
 			}
 			BitSet bs = Bloomer.bloom(int_ll, k, m);
 			byte[] b = bs.toByteArray();
-			output.writeUTF("b;t="+table);
-			output.write(b);
+			output.writeObject("b;t="+table);
+			output.writeObject(b);
 			conn.close();
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block

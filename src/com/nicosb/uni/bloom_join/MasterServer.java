@@ -3,6 +3,7 @@ package com.nicosb.uni.bloom_join;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -23,6 +24,7 @@ public class MasterServer implements Server{
 	
 	private Connection conn;
 	private HashMap<Integer, Socket> socketMap = new HashMap<>();
+	private HashMap<Integer, ObjectOutputStream> ostreamMap = new HashMap<>();
 	private ResultSet siteTables;
 	public QueryInformation cachedQuery;
 	public BloomProcessor activeProcessor;
@@ -124,11 +126,11 @@ public class MasterServer implements Server{
 			while(siteTables.next()){
 				Socket slave = getSocket(siteTables.getInt(1));
 				if(slave != null){
-					DataOutputStream out = new DataOutputStream(slave.getOutputStream());
-					out.writeUTF("t;k=6,m=2000");
+					ObjectOutputStream out = ostreamMap.get(siteTables.getInt(1));
+					out.writeObject("t;k=6,m=2000");
 					String attr = cachedQuery.getJoinAttributes().get(siteTables.getString(2));
-					out.writeUTF("SELECT DISTINCT " + attr + " FROM " + siteTables.getString(2));
-					out.write(bloomfilter);
+					out.writeObject("SELECT DISTINCT " + attr + " FROM " + siteTables.getString(2));
+					out.writeObject(bloomfilter);
 				}
 			}
 		} catch (SQLException e) {
@@ -141,5 +143,16 @@ public class MasterServer implements Server{
 			e.printStackTrace();
 		}
 	}
+
+	public void putOStream(int socketId, ObjectOutputStream objectOutputStream) {
+		ostreamMap.put(socketId, objectOutputStream);
+	}
+
+	public ObjectOutputStream getOStream(int socketId){
+		return ostreamMap.get(socketId);
+	}
+	
+	
+	
 	
 }
