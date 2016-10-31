@@ -21,6 +21,7 @@ import com.sun.rowset.CachedRowSetImpl;
 public class SlaveServer {
 	private ArrayList<String> tables;
 	private HashMap<String, ResultSet> cache = new HashMap<>();
+	private ObjectOutputStream output;
 
 	public SlaveServer(ArrayList<String> tables) {
 		super();
@@ -32,7 +33,7 @@ public class SlaveServer {
 	      Socket masterSocket;
 	      try{
 		      masterSocket = new Socket(masterHostName, masterPort);
-		      ObjectOutputStream output = new ObjectOutputStream(masterSocket.getOutputStream());
+		      output = new ObjectOutputStream(masterSocket.getOutputStream());
 		      output.writeObject(""+MasterServer.CHAR_REGISTER);
 		     
 		      System.out.println("Connected to master on port " + masterPort);
@@ -101,14 +102,11 @@ public class SlaveServer {
 						}			
 						
 						ResultSet rs = prep.executeQuery();
-						while(rs.next()){
-							System.out.println(rs.getString(1));
-						}
 						CachedRowSetImpl cr = new CachedRowSetImpl();	
 						cr.populate(rs);
-						ObjectOutputStream out = new ObjectOutputStream(masterSocket.getOutputStream());
-						out.writeObject(MasterServer.CHAR_TUPLES);
-						out.writeObject(cr);
+						
+						output.writeObject(""+MasterServer.CHAR_TUPLES);
+						output.writeObject(cr);
 						break;
 					case MasterServer.CHAR_TERMINATE:
 						masterSocket.close();

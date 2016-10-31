@@ -35,7 +35,6 @@ public class SlaveHandler implements Runnable {
 		try {
 			ObjectInputStream input = new ObjectInputStream(slaveSocket.getInputStream());
 			do{
-	
 				int slavePort = slaveSocket.getLocalPort();
 				String header = (String)input.readObject();
 				char c = header.charAt(0);
@@ -71,11 +70,13 @@ public class SlaveHandler implements Runnable {
 						break;
 					case MasterServer.CHAR_TUPLES:
 						try {
-							CachedRowSetImpl tuples = new CachedRowSetImpl();
-							tuples = (CachedRowSetImpl)input.readObject();
+							CachedRowSetImpl tuples = (CachedRowSetImpl)input.readObject();
 							tuples.beforeFirst();
 							while(tuples.next()){
-								System.out.print(tuples.getString(0) + tuples.getString(1));
+								for(int i = 1; i <= tuples.getMetaData().getColumnCount(); i++){
+									System.out.print(tuples.getString(i) + " | ");
+								}
+								System.out.print("\n");
 							}
 							tuples.close();
 						} catch (SQLException | ClassNotFoundException e) {
