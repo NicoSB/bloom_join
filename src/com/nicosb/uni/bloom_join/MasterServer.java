@@ -28,6 +28,7 @@ public class MasterServer implements Server{
 	private ResultSet siteTables;
 	public QueryInformation cachedQuery;
 	public BloomProcessor activeProcessor;
+	public JoinProcessor joinProcessor;
 	
 	
 	public MasterServer(){

@@ -105,7 +105,7 @@ public class SlaveServer {
 						CachedRowSetImpl cr = new CachedRowSetImpl();	
 						cr.populate(rs);
 						
-						output.writeObject(""+MasterServer.CHAR_TUPLES);
+						output.writeObject(MasterServer.CHAR_TUPLES+";t="+table);
 						output.writeObject(cr);
 						break;
 					case MasterServer.CHAR_TERMINATE:

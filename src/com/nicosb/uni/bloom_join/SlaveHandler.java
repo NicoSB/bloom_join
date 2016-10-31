@@ -70,14 +70,16 @@ public class SlaveHandler implements Runnable {
 						break;
 					case MasterServer.CHAR_TUPLES:
 						try {
+							String table_tup = header.substring(header.indexOf("t=")+"t=".length());
 							CachedRowSetImpl tuples = (CachedRowSetImpl)input.readObject();
-							tuples.beforeFirst();
-							while(tuples.next()){
-								for(int i = 1; i <= tuples.getMetaData().getColumnCount(); i++){
-									System.out.print(tuples.getString(i) + " | ");
-								}
-								System.out.print("\n");
-							}
+//							tuples.beforeFirst();
+//							while(tuples.next()){
+//								for(int i = 1; i <= tuples.getMetaData().getColumnCount(); i++){
+//									System.out.print(tuples.getString(i) + " | ");
+//								}
+//								System.out.print("\n");
+//							}
+							master.joinProcessor.addRowSet(table_tup, id, tuples);
 							tuples.close();
 						} catch (SQLException | ClassNotFoundException e) {
 							// TODO Auto-generated catch block

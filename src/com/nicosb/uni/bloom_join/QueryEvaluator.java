@@ -39,11 +39,13 @@ public class QueryEvaluator {
 			
 			ResultSet rs = prep.executeQuery();
 			master.activeProcessor = new BloomProcessor(qi.getTables());
+			master.joinProcessor = new JoinProcessor(qi.getJoinAttributes(), qi.getTables());
 			
 			while(rs.next()){
 				Socket slave = master.getSocket(rs.getInt(1));
 				if(slave != null){
 					master.activeProcessor.addRequested(rs.getString(2), rs.getInt(1));
+					master.joinProcessor.addRequested(rs.getString(2), rs.getInt(1));
 					ObjectOutputStream out = master.getOStream(rs.getInt(1));
 					String attr = qi.getJoinAttributes().get(rs.getString(2));
 					out.writeObject("b;k=6,m=2000");
