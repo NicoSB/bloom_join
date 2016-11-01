@@ -41,17 +41,17 @@ public class QueryInformationTest {
 	public void extractAttributes_extractsAllAttributes(){
 		String query = "SELECT * FROM table1 JOIN table2 ON table1.a = table2.b JOIN table3 ON table1.a = table3.c";
 		HashMap<String, String> expected = new HashMap<>();
-		expected.put("table1.a", "table1");
-		expected.put("table2.b", "table2");
-		expected.put("table3.c", "table3");
+		expected.put("table1", "a");
+		expected.put("table2", "b");
+		expected.put("table3", "c");
 		
 		QueryInformation qi;
 		try {
 			qi = new QueryInformation(query);
 
-			Assert.assertEquals(qi.getJoinAttributes().get("table1.a"), expected.get("table1.a"));
-			Assert.assertEquals(qi.getJoinAttributes().get("table2.b"), expected.get("table2.b"));
-			Assert.assertEquals(qi.getJoinAttributes().get("table3.c"), expected.get("table3.c"));
+			Assert.assertEquals(qi.getJoinAttributes().get("table1"), expected.get("table1"));
+			Assert.assertEquals(qi.getJoinAttributes().get("table2"), expected.get("table2"));
+			Assert.assertEquals(qi.getJoinAttributes().get("table3"), expected.get("table3"));
 		} catch (InvalidQueryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

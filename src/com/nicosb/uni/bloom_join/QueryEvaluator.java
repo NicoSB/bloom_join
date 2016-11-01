@@ -39,7 +39,7 @@ public class QueryEvaluator {
 			
 			ResultSet rs = prep.executeQuery();
 			master.activeProcessor = new BloomProcessor(qi.getTables());
-			master.joinProcessor = new JoinProcessor(qi.getJoinAttributes(), qi.getTables());
+			master.joinProcessor = new JoinProcessor(qi.getJoinAttributes(), master.latestQuery, qi.getTables());
 			
 			while(rs.next()){
 				Socket slave = master.getSocket(rs.getInt(1));

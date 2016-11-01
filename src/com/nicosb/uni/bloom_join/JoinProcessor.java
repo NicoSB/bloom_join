@@ -15,6 +15,8 @@ public class JoinProcessor {
 	private ArrayList<String> indices = new ArrayList<>();
 	private HashMap<String, String> joinAttrs = new HashMap<>();
 	private ArrayList<CachedRowSetImpl> rowSets = new ArrayList<>();
+	private JoinRowSet jrs;
+	private String currentQuery;
 	boolean occupied = false;
 	int count = 0;
 	
@@ -23,14 +25,21 @@ public class JoinProcessor {
 	 * Otherwise, the processor won't finish!
 	 * @param tables
 	 */
-	public JoinProcessor(HashMap<String, String> joinAttrs, String... tables){
+	public JoinProcessor(HashMap<String, String> joinAttrs, String query, String... tables){
 		count = tables.length;
+		currentQuery = query;
 		for(String t: tables){
 			ArrayList<Integer> ints = new ArrayList<>();
 			requestList.add(ints);
 			indices.add(t);
 			rowSets.add(null);
 			this.joinAttrs = joinAttrs;
+			try {
+				jrs = new JoinRowSetImpl();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -72,19 +81,19 @@ public class JoinProcessor {
 	
 	public void addRowSet(String table, int serverId, CachedRowSetImpl crsi){
 		boolean finished = removeRequested(table, serverId);
-		CachedRowSetImpl c;
-		if((c = getRowSet(table)) == null){
-			c = crsi;
+		int index = getIndex(table);
+		if(rowSets.get(index) == null){
+			rowSets.set(getIndex(table), crsi);	
 		}
 		else{
-			c = getRowSet(table);
 			try {
+				crsi.beforeFirst();
 				while(crsi.next()){
-					c.moveToInsertRow();
+					rowSets.get(index).moveToInsertRow();
 					for(int i = 1; i <= crsi.getMetaData().getColumnCount(); i++){
-						c.updateString(i, crsi.getString(i));
+						rowSets.get(index).updateString(i, crsi.getString(i));
 					}
-					c.insertRow();
+					rowSets.get(index).insertRow();
 				}
 				
 			} catch (SQLException e) {
@@ -92,17 +101,24 @@ public class JoinProcessor {
 				e.printStackTrace();
 			}	
 		}
-		if(finished){
+		if(finished){		
 			joinRowSets();
 		}
 	}
+	
 	private void joinRowSets() {
 		try {
-			JoinRowSet jrs = new JoinRowSetImpl();
+			System.out.println("Joining results....");
 			for(int i = 0; i < rowSets.size(); i++){
+				rowSets.get(i).beforeFirst();
 				jrs.addRowSet(rowSets.get(i), rowSets.get(i).getMetaData().getColumnName(getJoinAttrIndex(indices.get(i))));
 			}
 			jrs.beforeFirst();
+			System.out.println("--------------------------------");
+			System.out.println("|"+currentQuery+"|");
+			System.out.println("--------------------------------");
+			System.out.println("-----------RESULT---------------");
+			System.out.println("--------------------------------");
 			while(jrs.next()){
 				for(int i = 1; i <= jrs.getMetaData().getColumnCount(); i++){
 					System.out.print(jrs.getString(i) + " | ");

@@ -29,6 +29,7 @@ public class MasterServer implements Server{
 	public QueryInformation cachedQuery;
 	public BloomProcessor activeProcessor;
 	public JoinProcessor joinProcessor;
+	public String latestQuery;
 	
 	
 	public MasterServer(){
@@ -92,9 +93,9 @@ public class MasterServer implements Server{
 		Scanner s = new Scanner(System.in);
 		while(true){
 			System.out.print("psql>>>");
-			String query = s.nextLine();
+			latestQuery = s.nextLine();
 			try {
-				cachedQuery = new QueryInformation(query);
+				cachedQuery = new QueryInformation(latestQuery);
 				siteTables = QueryEvaluator.evaluate(cachedQuery, this);
 			} catch (InvalidQueryException e) {
 				System.out.println("ERROR: Invalid input!");

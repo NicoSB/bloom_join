@@ -3,7 +3,6 @@ package com.nicosb.uni.bloom_join;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -56,7 +55,7 @@ public class SlaveHandler implements Runnable {
 						for(int i = 0; i < b.length; i++){
 							System.out.print(String.format("%8s", Integer.toBinaryString(b[i] & 0xFF)).replace(' ', '0'));
 						}
-						System.out.print("\n");
+						System.out.println("");
 
 						BitSet result;
 						if((result = master.activeProcessor.ORJoin(table, id, b)) != null){
@@ -65,6 +64,7 @@ public class SlaveHandler implements Runnable {
 							for(int i = 0; i < byteArray.length; i++){
 								System.out.print(String.format("%8s", Integer.toBinaryString(byteArray[i] & 0xFF)).replace(' ', '0'));
 							}
+							System.out.println("");
 							master.sendBloomFilter(result.toByteArray());
 						}
 						break;
@@ -72,15 +72,8 @@ public class SlaveHandler implements Runnable {
 						try {
 							String table_tup = header.substring(header.indexOf("t=")+"t=".length());
 							CachedRowSetImpl tuples = (CachedRowSetImpl)input.readObject();
-//							tuples.beforeFirst();
-//							while(tuples.next()){
-//								for(int i = 1; i <= tuples.getMetaData().getColumnCount(); i++){
-//									System.out.print(tuples.getString(i) + " | ");
-//								}
-//								System.out.print("\n");
-//							}
+							tuples.beforeFirst();
 							master.joinProcessor.addRowSet(table_tup, id, tuples);
-							tuples.close();
 						} catch (SQLException | ClassNotFoundException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
