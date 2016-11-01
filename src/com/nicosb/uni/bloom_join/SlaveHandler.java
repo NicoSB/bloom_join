@@ -29,7 +29,7 @@ public class SlaveHandler implements Runnable {
 
 	@Override
 	public void run() {
-		System.out.println("handler started for slave id=" + id);
+		CustomLog.println("handler started for slave id=" + id);
 
 		try {
 			ObjectInputStream input = new ObjectInputStream(slaveSocket.getInputStream());
@@ -37,34 +37,34 @@ public class SlaveHandler implements Runnable {
 				int slavePort = slaveSocket.getLocalPort();
 				String header = (String)input.readObject();
 				char c = header.charAt(0);
-				System.out.println("received message from slave " + id + "(" + c + ")");
+				CustomLog.println("received message from slave " + id + "(" + c + ")");
 				switch(c){
 					case MasterServer.CHAR_REGISTER:
 						String tables = (String)input.readObject();
 						if(registerServer(slavePort, tables)){
 							master.putSocket(master.getSocketCount(), slaveSocket);
 							master.putOStream(id, new ObjectOutputStream(slaveSocket.getOutputStream()));
-							System.out.println("registered slave #" + id);
+							CustomLog.println("registered slave #" + id);
 						}
 						break;
 					case MasterServer.CHAR_BLOOMFILTER:
 						byte b[] =  (byte[])input.readObject();
 						String table = header.substring(header.indexOf("t=")+"t=".length());
-						System.out.println("received bloom filter from " + id + " for table " + table);
-						System.out.println(b.length);
+						CustomLog.println("received bloom filter from " + id + " for table " + table);
+						CustomLog.println(b.length);
 						for(int i = 0; i < b.length; i++){
-							System.out.print(String.format("%8s", Integer.toBinaryString(b[i] & 0xFF)).replace(' ', '0'));
+							CustomLog.print(String.format("%8s", Integer.toBinaryString(b[i] & 0xFF)).replace(' ', '0'));
 						}
-						System.out.println("");
+						CustomLog.println("");
 
 						BitSet result;
 						if((result = master.activeProcessor.ORJoin(table, id, b)) != null){
-							System.out.println("Joined all bloom filters: ");	
+							CustomLog.println("Joined all bloom filters: ");	
 							byte[] byteArray = result.toByteArray();
 							for(int i = 0; i < byteArray.length; i++){
-								System.out.print(String.format("%8s", Integer.toBinaryString(byteArray[i] & 0xFF)).replace(' ', '0'));
+								CustomLog.print(String.format("%8s", Integer.toBinaryString(byteArray[i] & 0xFF)).replace(' ', '0'));
 							}
-							System.out.println("");
+							CustomLog.println("");
 							master.sendBloomFilter(result.toByteArray());
 						}
 						break;

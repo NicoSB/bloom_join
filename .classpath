@@ -4,6 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="C:/Users/Nico/Downloads/com.sun.rowset.jar/com.sun.rowset.jar"/>
-	<classpathentry kind="lib" path="E:/Nico/Documents/Git/bloom_join/postgresql-9.4.1211.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Nico/Documents/GitHub/bloom_join/postgresql-9.4.1211.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

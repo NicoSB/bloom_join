@@ -1,7 +1,5 @@
 package com.nicosb.uni.bloom_join.test;
 
-import static org.junit.Assert.*;
-
 import java.util.HashMap;
 
 import org.junit.Assert;

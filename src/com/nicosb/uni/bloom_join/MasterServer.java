@@ -1,7 +1,5 @@
 package com.nicosb.uni.bloom_join;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
@@ -9,7 +7,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -57,8 +54,8 @@ public class MasterServer implements Server{
 		try {
 			@SuppressWarnings("resource")
 			ServerSocket masterSocket = new ServerSocket(port);
-			System.out.println("master server started on port " + masterSocket.getLocalPort());
-			
+			CustomLog.println("master server started on port " + masterSocket.getLocalPort());
+			CustomLog.printToFile = true;
 
 			// This thread listens for registrations from other servers
 			class ConnectionListener implements Runnable{
@@ -92,13 +89,13 @@ public class MasterServer implements Server{
 		@SuppressWarnings("resource")
 		Scanner s = new Scanner(System.in);
 		while(true){
-			System.out.print("psql>>>");
+			CustomLog.print("psql>>>");
 			latestQuery = s.nextLine();
 			try {
 				cachedQuery = new QueryInformation(latestQuery);
 				siteTables = QueryEvaluator.evaluate(cachedQuery, this);
 			} catch (InvalidQueryException e) {
-				System.out.println("ERROR: Invalid input!");
+				CustomLog.println("ERROR: Invalid input!");
 			}
 		}
 	}

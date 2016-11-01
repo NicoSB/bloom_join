@@ -108,22 +108,22 @@ public class JoinProcessor {
 	
 	private void joinRowSets() {
 		try {
-			System.out.println("Joining results....");
+			CustomLog.println("Joining results....");
 			for(int i = 0; i < rowSets.size(); i++){
 				rowSets.get(i).beforeFirst();
 				jrs.addRowSet(rowSets.get(i), rowSets.get(i).getMetaData().getColumnName(getJoinAttrIndex(indices.get(i))));
 			}
 			jrs.beforeFirst();
-			System.out.println("--------------------------------");
-			System.out.println("|"+currentQuery+"|");
-			System.out.println("--------------------------------");
-			System.out.println("-----------RESULT---------------");
-			System.out.println("--------------------------------");
+			CustomLog.println("--------------------------------");
+			CustomLog.println("|"+currentQuery+"|");
+			CustomLog.println("--------------------------------");
+			CustomLog.println("-----------RESULT---------------");
+			CustomLog.println("--------------------------------");
 			while(jrs.next()){
 				for(int i = 1; i <= jrs.getMetaData().getColumnCount(); i++){
-					System.out.print(jrs.getString(i) + " | ");
+					CustomLog.print(jrs.getString(i) + " | ");
 				}
-				System.out.print("\n");
+				CustomLog.print("\n");
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

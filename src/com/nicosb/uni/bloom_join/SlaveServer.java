@@ -3,7 +3,6 @@ package com.nicosb.uni.bloom_join;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -36,7 +35,7 @@ public class SlaveServer {
 		      output = new ObjectOutputStream(masterSocket.getOutputStream());
 		      output.writeObject(""+MasterServer.CHAR_REGISTER);
 		     
-		      System.out.println("Connected to master on port " + masterPort);
+		      CustomLog.println("Connected to master on port " + masterPort);
 		      // register with covered tables
 		      String tablesString = "";
 		      for(String s: tables){
@@ -53,12 +52,12 @@ public class SlaveServer {
 					case MasterServer.CHAR_BLOOMFILTER:
 						int k = Integer.valueOf(header.substring(header.indexOf("k=")+2,header.indexOf(",")));
 						int m = Integer.valueOf(header.substring(header.indexOf("m=")+2));
-						System.out.println("received bloom request from master with params (m=" + m + " k=" + k + ")");
+						CustomLog.println("received bloom request from master with params (m=" + m + " k=" + k + ")");
 						send(output, (String)input.readObject(), k, m);
 						output.flush();
 						break;
 					case MasterServer.CHAR_TUPLES:
-						System.out.println("received tuple request from master");						
+						CustomLog.println("received tuple request from master");						
 						int k_c = Integer.valueOf(header.substring(header.indexOf("k=")+2,header.indexOf(",")));
 						int m_c = Integer.valueOf(header.substring(header.indexOf("m=")+2));
 						
@@ -70,7 +69,7 @@ public class SlaveServer {
 						if(cache.containsKey(query)){
 							ResultSet cachedRS = cache.get(query);
 							cachedRS.beforeFirst();
-							System.out.println(query);
+							CustomLog.println(query);
 							while(cachedRS.next()){
 								if(Bloomer.is_in(getStrScore(cachedRS.getString(1)), BitSet.valueOf(bloomRequest), k_c, m_c)) results.add(cachedRS.getString(1));
 							}
@@ -120,7 +119,7 @@ public class SlaveServer {
 
 	private void send(ObjectOutputStream output, String query, int k, int m) {
 		try {
-			System.out.println("executing " + query);
+			CustomLog.println("executing " + query);
 			Class.forName("org.postgresql.Driver");
 			String url = "jdbc:postgresql://localhost/bloom_join";
 			Properties props = new Properties();
@@ -159,7 +158,7 @@ public class SlaveServer {
 	private Integer getStrScore(String string) {
 		int score = 0;
 		for(int i = 0; i < string.length(); i++){
-			score += (int)string.charAt(i);
+			score += string.charAt(i);
 		}
 		return score;
 	}
