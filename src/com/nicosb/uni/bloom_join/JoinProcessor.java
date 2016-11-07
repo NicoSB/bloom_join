@@ -17,7 +17,6 @@ public class JoinProcessor {
 	private ArrayList<CachedRowSetImpl> rowSets = new ArrayList<>();
 	private JoinRowSet jrs;
 	private String currentQuery;
-	private MasterServer master;
 	boolean occupied = false;
 	int count = 0;
 	
@@ -29,7 +28,6 @@ public class JoinProcessor {
 	public JoinProcessor(HashMap<String, String> joinAttrs, String query, MasterServer master, String... tables){
 		count = tables.length;
 		currentQuery = query;
-		this.master = master;
 		for(String t: tables){
 			ArrayList<Integer> ints = new ArrayList<>();
 			requestList.add(ints);

@@ -34,7 +34,6 @@ public class SlaveServer {
 	      Socket masterSocket;
 	      try{
 		      masterSocket = new Socket(masterHostName, masterPort);
-		      ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		      output = new ObjectOutputStream(masterSocket.getOutputStream());
 		      output.writeObject(""+MasterServer.CHAR_REGISTER);
 		     
