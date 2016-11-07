@@ -12,6 +12,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MasterServer implements Server{
 	public static final char CHAR_BLOOMFILTER = 'b';
@@ -23,6 +25,7 @@ public class MasterServer implements Server{
 	private HashMap<Integer, Socket> socketMap = new HashMap<>();
 	private HashMap<Integer, ObjectOutputStream> ostreamMap = new HashMap<>();
 	private ResultSet siteTables;
+	private int recordedTraffic = 0;
 	public QueryInformation cachedQuery;
 	public BloomProcessor activeProcessor;
 	public JoinProcessor joinProcessor;
@@ -55,7 +58,6 @@ public class MasterServer implements Server{
 			@SuppressWarnings("resource")
 			ServerSocket masterSocket = new ServerSocket(port);
 			CustomLog.println("master server started on port " + masterSocket.getLocalPort());
-			CustomLog.printToFile = true;
 
 			// This thread listens for registrations from other servers
 			class ConnectionListener implements Runnable{
@@ -92,6 +94,10 @@ public class MasterServer implements Server{
 			CustomLog.print("psql>>>");
 			latestQuery = s.nextLine();
 			try {
+				CustomLog.printToConsole=true;
+				CustomLog.printToFile=false;
+				setRecordedTraffic(0);
+				latestQuery = applyOptions(latestQuery);
 				cachedQuery = new QueryInformation(latestQuery);
 				siteTables = QueryEvaluator.evaluate(cachedQuery, this);
 			} catch (InvalidQueryException e) {
@@ -101,6 +107,24 @@ public class MasterServer implements Server{
 	}
 
 		
+	private String applyOptions(String query) {
+		Pattern p = Pattern.compile("-[ln]");
+		Matcher m = p.matcher(query);
+		while(m.find()){
+			String option = m.group();
+			query = m.replaceFirst("");
+			switch(option.charAt(1)){
+				case 'l':
+					CustomLog.printToFile = true;
+					break;
+				case 'n':
+					CustomLog.printToConsole = false;
+					break;
+			}
+		}
+		return query.trim();
+	}
+
 	/**
 	 * 
 	 * @param port the server's port
@@ -150,8 +174,21 @@ public class MasterServer implements Server{
 	public ObjectOutputStream getOStream(int socketId){
 		return ostreamMap.get(socketId);
 	}
-	
-	
+
+	public void logTraffic(int size){
+		setRecordedTraffic(getRecordedTraffic() + size);
+	}
+	public int getTraffic(){
+		return getRecordedTraffic();
+	}
+
+	public int getRecordedTraffic() {
+		return recordedTraffic;
+	}
+
+	public void setRecordedTraffic(int recordedTraffic) {
+		this.recordedTraffic = recordedTraffic;
+	}
 	
 	
 }

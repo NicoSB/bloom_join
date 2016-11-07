@@ -17,6 +17,7 @@ public class JoinProcessor {
 	private ArrayList<CachedRowSetImpl> rowSets = new ArrayList<>();
 	private JoinRowSet jrs;
 	private String currentQuery;
+	private MasterServer master;
 	boolean occupied = false;
 	int count = 0;
 	
@@ -25,9 +26,10 @@ public class JoinProcessor {
 	 * Otherwise, the processor won't finish!
 	 * @param tables
 	 */
-	public JoinProcessor(HashMap<String, String> joinAttrs, String query, String... tables){
+	public JoinProcessor(HashMap<String, String> joinAttrs, String query, MasterServer master, String... tables){
 		count = tables.length;
 		currentQuery = query;
+		this.master = master;
 		for(String t: tables){
 			ArrayList<Integer> ints = new ArrayList<>();
 			requestList.add(ints);
@@ -118,6 +120,7 @@ public class JoinProcessor {
 			CustomLog.println("|"+currentQuery+"|");
 			CustomLog.println("--------------------------------");
 			CustomLog.println("-----------RESULT---------------");
+			CustomLog.println("----------" + TrafficLogger.loggedTraffic + " bytes -----------");
 			CustomLog.println("--------------------------------");
 			while(jrs.next()){
 				for(int i = 1; i <= jrs.getMetaData().getColumnCount(); i++){

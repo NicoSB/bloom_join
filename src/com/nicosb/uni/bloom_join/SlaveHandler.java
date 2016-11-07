@@ -35,12 +35,14 @@ public class SlaveHandler implements Runnable {
 			ObjectInputStream input = new ObjectInputStream(slaveSocket.getInputStream());
 			do{
 				int slavePort = slaveSocket.getLocalPort();
-				String header = (String)input.readObject();
+				String header = (String)TrafficLogger.readObject(input);
+				master.logTraffic(header.getBytes().length);
 				char c = header.charAt(0);
 				CustomLog.println("received message from slave " + id + "(" + c + ")");
 				switch(c){
 					case MasterServer.CHAR_REGISTER:
-						String tables = (String)input.readObject();
+						String tables = (String)TrafficLogger.readObject(input);
+						master.logTraffic(tables.getBytes().length);
 						if(registerServer(slavePort, tables)){
 							master.putSocket(master.getSocketCount(), slaveSocket);
 							master.putOStream(id, new ObjectOutputStream(slaveSocket.getOutputStream()));
@@ -48,7 +50,7 @@ public class SlaveHandler implements Runnable {
 						}
 						break;
 					case MasterServer.CHAR_BLOOMFILTER:
-						byte b[] =  (byte[])input.readObject();
+						byte b[] =  (byte[])TrafficLogger.readObject(input);
 						String table = header.substring(header.indexOf("t=")+"t=".length());
 						CustomLog.println("received bloom filter from " + id + " for table " + table);
 						CustomLog.println(b.length);
@@ -69,21 +71,28 @@ public class SlaveHandler implements Runnable {
 						}
 						break;
 					case MasterServer.CHAR_TUPLES:
+						String table_tup = header.substring(header.indexOf("t=")+"t=".length());
+						int size;
 						try {
-							String table_tup = header.substring(header.indexOf("t=")+"t=".length());
-							CachedRowSetImpl tuples = (CachedRowSetImpl)input.readObject();
+							size = input.available();
+							CachedRowSetImpl tuples = (CachedRowSetImpl)TrafficLogger.readObject(input);
+							master.logTraffic(size);
+							
 							tuples.beforeFirst();
 							master.joinProcessor.addRowSet(table_tup, id, tuples);
-						} catch (SQLException | ClassNotFoundException e) {
+							break;
+						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						break;
 				}
 			}while(slaveSocket.isConnected());
-		} catch (IOException | ClassNotFoundException e) {
+		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 	}
 	

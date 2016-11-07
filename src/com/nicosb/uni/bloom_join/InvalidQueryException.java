@@ -1,7 +1,12 @@
 package com.nicosb.uni.bloom_join;
 
 public class InvalidQueryException extends Exception {
-    //Parameterless Constructor
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3304981005174005400L;
+
+	//Parameterless Constructor
     public InvalidQueryException() {}
 
     //Constructor that accepts a message

@@ -1,7 +1,9 @@
 package com.nicosb.uni.bloom_join;
 
 import java.io.ObjectInputStream;
+
 import java.io.ObjectOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.Connection;
@@ -32,6 +34,7 @@ public class SlaveServer {
 	      Socket masterSocket;
 	      try{
 		      masterSocket = new Socket(masterHostName, masterPort);
+		      ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		      output = new ObjectOutputStream(masterSocket.getOutputStream());
 		      output.writeObject(""+MasterServer.CHAR_REGISTER);
 		     
@@ -45,7 +48,7 @@ public class SlaveServer {
 		      output.writeObject(tablesString);
 		      ObjectInputStream input = new ObjectInputStream(masterSocket.getInputStream());
 		      do{	
-		    	String header = (String)input.readObject();
+		    	String header = (String)TrafficLogger.readObject(input);
 		    	
 		    	char c = header.charAt(0);
 		    	switch(c){
@@ -53,7 +56,7 @@ public class SlaveServer {
 						int k = Integer.valueOf(header.substring(header.indexOf("k=")+2,header.indexOf(",")));
 						int m = Integer.valueOf(header.substring(header.indexOf("m=")+2));
 						CustomLog.println("received bloom request from master with params (m=" + m + " k=" + k + ")");
-						send(output, (String)input.readObject(), k, m);
+						send(output, (String)TrafficLogger.readObject(input), k, m);
 						output.flush();
 						break;
 					case MasterServer.CHAR_TUPLES:
@@ -61,8 +64,8 @@ public class SlaveServer {
 						int k_c = Integer.valueOf(header.substring(header.indexOf("k=")+2,header.indexOf(",")));
 						int m_c = Integer.valueOf(header.substring(header.indexOf("m=")+2));
 						
-						String query = (String)input.readObject();
-						byte[] bloomRequest = (byte[])input.readObject();
+						String query = (String)TrafficLogger.readObject(input);
+						byte[] bloomRequest = (byte[])TrafficLogger.readObject(input);
 						
 						ArrayList<String> results = new ArrayList<>();
 						
