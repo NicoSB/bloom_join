@@ -96,8 +96,8 @@ public class JoinProcessor {
 						rowSets.get(index).updateString(i, crsi.getString(i));
 					}
 					rowSets.get(index).insertRow();
+					rowSets.get(index).moveToCurrentRow();
 				}
-				
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -113,14 +113,15 @@ public class JoinProcessor {
 			CustomLog.println("Joining results....");
 			for(int i = 0; i < rowSets.size(); i++){
 				rowSets.get(i).beforeFirst();
-				jrs.addRowSet(rowSets.get(i), rowSets.get(i).getMetaData().getColumnName(getJoinAttrIndex(indices.get(i))));
+				rowSets.get(i).setMatchColumn(getJoinAttrIndex(indices.get(i)));
+				jrs.addRowSet(rowSets.get(i));
 			}
 			jrs.beforeFirst();
 			CustomLog.println("--------------------------------");
 			CustomLog.println("|"+currentQuery+"|");
 			CustomLog.println("--------------------------------");
 			CustomLog.println("-----------RESULT---------------");
-			CustomLog.println("----------" + TrafficLogger.loggedTraffic + " bytes -----------");
+			CustomLog.println("----------" + CustomLog.getTraffic(true) + " bytes -----------");
 			CustomLog.println("--------------------------------");
 			while(jrs.next()){
 				for(int i = 1; i <= jrs.getMetaData().getColumnCount(); i++){

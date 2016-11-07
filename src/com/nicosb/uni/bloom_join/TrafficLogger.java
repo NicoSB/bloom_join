@@ -7,11 +7,12 @@ import java.lang.instrument.Instrumentation;
 public class TrafficLogger {
 	private static Instrumentation instrumentation;
 	public static int loggedTraffic = 0;
-	public static Object readObject(ObjectInputStream input){
+	public static <T> T readObject(ObjectInputStream input){
 		try {
-			Object o = input.readObject();
-			loggedTraffic += instrumentation.getObjectSize(o);
-			return 0;
+			T o = (T)input.readObject();
+			CustomLog.sizeLog(o);
+			//loggedTraffic += instrumentation.getObjectSize(o);
+			return o;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
