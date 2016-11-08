@@ -36,13 +36,11 @@ public class SlaveHandler implements Runnable {
 			do{
 				int slavePort = slaveSocket.getLocalPort();
 				String header = (String)TrafficLogger.readObject(input);
-				master.logTraffic(header.getBytes().length);
 				char c = header.charAt(0);
 				CustomLog.println("received message from slave " + id + "(" + c + ")");
 				switch(c){
 					case MasterServer.CHAR_REGISTER:
 						String tables = (String)TrafficLogger.readObject(input);
-						master.logTraffic(tables.getBytes().length);
 						if(registerServer(slavePort, tables)){
 							master.putSocket(master.getSocketCount(), slaveSocket);
 							master.putOStream(id, new ObjectOutputStream(slaveSocket.getOutputStream()));
@@ -53,14 +51,13 @@ public class SlaveHandler implements Runnable {
 						byte b[] =  (byte[])TrafficLogger.readObject(input);
 						String table = header.substring(header.indexOf("t=")+"t=".length());
 						CustomLog.println("received bloom filter from " + id + " for table " + table);
-						CustomLog.println(b.length);
 						for(int i = 0; i < b.length; i++){
 							CustomLog.print(String.format("%8s", Integer.toBinaryString(b[i] & 0xFF)).replace(' ', '0'));
 						}
 						CustomLog.println("");
 
 						BitSet result;
-						if((result = master.activeProcessor.ORJoin(table, id, b)) != null){
+						if((result = master.currentAssignment.getActiveProcessor().ORJoin(table, id, b)) != null){
 							CustomLog.println("Joined all bloom filters: ");	
 							byte[] byteArray = result.toByteArray();
 							for(int i = 0; i < byteArray.length; i++){
@@ -71,20 +68,21 @@ public class SlaveHandler implements Runnable {
 						}
 						break;
 					case MasterServer.CHAR_TUPLES:
-						String table_tup = header.substring(header.indexOf("t=")+"t=".length());
-						int size;
-						try {
-							size = input.available();
+						if(master.isBloomed()){
+							String table_tup = header.substring(header.indexOf("t=")+"t=".length());
 							CachedRowSetImpl tuples = (CachedRowSetImpl)TrafficLogger.readObject(input);
-							master.logTraffic(size);
 							
 							tuples.beforeFirst();
-							master.joinProcessor.addRowSet(table_tup, id, tuples);
-							break;
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							master.currentAssignment.getJoinProcessor().addRowSet(table_tup, id, tuples);
 						}
+						else{
+							String table_tup = header.substring(header.indexOf("t=")+"t=".length());
+							CachedRowSetImpl tuples = (CachedRowSetImpl)TrafficLogger.readObject(input);
+							
+							tuples.beforeFirst();
+							master.currentAssignment.getSemiJoinProcessor().addRowSet(table_tup, id, tuples);
+						}
+						break;
 				}
 			}while(slaveSocket.isConnected());
 		} catch (SQLException e) {
@@ -115,7 +113,7 @@ public class SlaveHandler implements Runnable {
 			PreparedStatement prep = conn.prepareStatement("INSERT INTO sitetables(siteport, tablename) VALUES(" + master.getSocketCount() + ", ?)");
 
 			for(String t: tables_split){
-				prep.setString(1, t);
+				prep.setString(1, t.toLowerCase());
 				prep.execute();
 			}
 			conn.close();

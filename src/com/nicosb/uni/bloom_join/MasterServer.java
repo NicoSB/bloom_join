@@ -15,6 +15,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 public class MasterServer implements Server{
 	public static final char CHAR_BLOOMFILTER = 'b';
 	public static final char CHAR_TUPLES = 't';
@@ -25,12 +26,8 @@ public class MasterServer implements Server{
 	private HashMap<Integer, Socket> socketMap = new HashMap<>();
 	private HashMap<Integer, ObjectOutputStream> ostreamMap = new HashMap<>();
 	private ResultSet siteTables;
-	private int recordedTraffic = 0;
-	public QueryInformation cachedQuery;
-	public BloomProcessor activeProcessor;
-	public JoinProcessor joinProcessor;
+	public Assignment currentAssignment;
 	public String latestQuery;
-	
 	
 	public MasterServer(){
 		try {
@@ -41,6 +38,8 @@ public class MasterServer implements Server{
 			props.setProperty("password", System.getenv("DB_PASSWORD"));
 			conn = DriverManager.getConnection(url, props);
 			conn.createStatement().executeUpdate("TRUNCATE TABLE sitetables");
+			
+			currentAssignment = new Assignment();
 			
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -96,10 +95,9 @@ public class MasterServer implements Server{
 			try {
 				CustomLog.printToConsole=true;
 				CustomLog.printToFile=false;
-				setRecordedTraffic(0);
 				latestQuery = applyOptions(latestQuery);
-				cachedQuery = new QueryInformation(latestQuery);
-				siteTables = QueryEvaluator.evaluate(cachedQuery, this);
+				currentAssignment.setCachedQuery(new QueryInformation(latestQuery));
+				siteTables = QueryEvaluator.evaluate(currentAssignment.getCachedQuery(), this);
 			} catch (InvalidQueryException e) {
 				CustomLog.println("ERROR: Invalid input!");
 			}
@@ -108,17 +106,23 @@ public class MasterServer implements Server{
 
 		
 	private String applyOptions(String query) {
-		Pattern p = Pattern.compile("-[ln]");
+		Pattern p = Pattern.compile("-[ldn]");
 		Matcher m = p.matcher(query);
 		while(m.find()){
 			String option = m.group();
 			query = m.replaceFirst("");
 			switch(option.charAt(1)){
+					// log to file
 				case 'l':
 					CustomLog.printToFile = true;
 					break;
-				case 'n':
+					// discard log
+				case 'd':
 					CustomLog.printToConsole = false;
+					break;
+					// no bloom
+				case 'n':
+					currentAssignment.setBloom(false);
 					break;
 			}
 		}
@@ -151,7 +155,7 @@ public class MasterServer implements Server{
 				if(slave != null){
 					ObjectOutputStream out = ostreamMap.get(siteTables.getInt(1));
 					out.writeObject("t;k=6,m=2000");
-					String attr = cachedQuery.getJoinAttributes().get(siteTables.getString(2));
+					String attr = currentAssignment.getCachedQuery().getJoinAttributes().get(siteTables.getString(2));
 					out.writeObject("SELECT DISTINCT " + attr + " FROM " + siteTables.getString(2));
 					out.writeObject(bloomfilter);
 				}
@@ -167,6 +171,19 @@ public class MasterServer implements Server{
 		}
 	}
 
+	public void sendIndices(String[] vals) throws SQLException, IOException{
+		siteTables.beforeFirst();
+		while(siteTables.next()){
+			Socket slave = getSocket(siteTables.getInt(1));
+			if(slave != null){
+				ObjectOutputStream out = ostreamMap.get(siteTables.getInt(1));
+				String table = siteTables.getString(2);
+				String attr = currentAssignment.getCachedQuery().getJoinAttributes().get(table);
+				out.writeObject("t;t="+table+"a="+attr);
+				out.writeObject(vals);
+			}
+		}		
+	}
 	public void putOStream(int socketId, ObjectOutputStream objectOutputStream) {
 		ostreamMap.put(socketId, objectOutputStream);
 	}
@@ -174,21 +191,8 @@ public class MasterServer implements Server{
 	public ObjectOutputStream getOStream(int socketId){
 		return ostreamMap.get(socketId);
 	}
-
-	public void logTraffic(int size){
-		setRecordedTraffic(getRecordedTraffic() + size);
+	public boolean isBloomed(){
+		return currentAssignment.isBloom();
 	}
-	public int getTraffic(){
-		return getRecordedTraffic();
-	}
-
-	public int getRecordedTraffic() {
-		return recordedTraffic;
-	}
-
-	public void setRecordedTraffic(int recordedTraffic) {
-		this.recordedTraffic = recordedTraffic;
-	}
-	
 	
 }

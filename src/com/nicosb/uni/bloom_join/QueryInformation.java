@@ -30,7 +30,8 @@ public class QueryInformation {
 			m = p.matcher(attributesSubstring); 
 			if(m.find()){
 				String attr = m.group();
-				attrs.put(attr.substring(0, attr.indexOf(".")), attr.substring(attr.indexOf(".")+1));
+				// table, attr
+				attrs.put(attr.substring(0, attr.indexOf(".")).toLowerCase(), attr.substring(attr.indexOf(".")+1));
 				attributesSubstring = attributesSubstring.substring(attributesSubstring.indexOf("=") + 1).trim();
 				m = p.matcher(attributesSubstring);
 				if(m.find()){
@@ -47,7 +48,7 @@ public class QueryInformation {
 		String table1 = query.substring(query.indexOf("FROM ") + "FROM ".length(), query.indexOf("JOIN")).trim();
 		String joinSubstring = query;
 		ArrayList<String> join_tables = new ArrayList<>();
-		join_tables.add(table1);
+		join_tables.add(table1.toLowerCase());
 		int index;
 		while((index = joinSubstring.indexOf("JOIN ")) != -1){
 			joinSubstring = joinSubstring.substring(index + "JOIN ".length()).trim();

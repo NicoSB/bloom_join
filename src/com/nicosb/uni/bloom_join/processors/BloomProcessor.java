@@ -1,9 +1,9 @@
-package com.nicosb.uni.bloom_join;
+package com.nicosb.uni.bloom_join.processors;
 
 import java.util.ArrayList;
 import java.util.BitSet;
 
-public class BloomProcessor {
+public class BloomProcessor implements Processor {
 	private ArrayList<ArrayList<Integer>> requestList = new ArrayList<>();
 	private ArrayList<String> indices = new ArrayList<>();
 	private ArrayList<BitSet> bloomFilters = new ArrayList<>();

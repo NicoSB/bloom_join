@@ -6,7 +6,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.nicosb.uni.bloom_join.BloomProcessor;
+import com.nicosb.uni.bloom_join.processors.BloomProcessor;
 
 public class BloomProcessorTest {
 	BloomProcessor prc;

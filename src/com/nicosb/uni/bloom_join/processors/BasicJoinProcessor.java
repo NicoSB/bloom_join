@@ -1,4 +1,4 @@
-package com.nicosb.uni.bloom_join;
+package com.nicosb.uni.bloom_join.processors;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -7,16 +7,18 @@ import java.util.HashMap;
 
 import javax.sql.rowset.JoinRowSet;
 
+import com.nicosb.uni.bloom_join.MasterServer;
 import com.sun.rowset.CachedRowSetImpl;
 import com.sun.rowset.JoinRowSetImpl;
 
-public class JoinProcessor {
-	private ArrayList<ArrayList<Integer>> requestList = new ArrayList<>();
-	private ArrayList<String> indices = new ArrayList<>();
-	private HashMap<String, String> joinAttrs = new HashMap<>();
-	private ArrayList<CachedRowSetImpl> rowSets = new ArrayList<>();
-	private JoinRowSet jrs;
-	private String currentQuery;
+public class BasicJoinProcessor implements Processor {
+	protected ArrayList<ArrayList<Integer>> requestList = new ArrayList<>();
+	protected ArrayList<String> indices = new ArrayList<>();
+	protected HashMap<String, String> joinAttrs = new HashMap<>();
+	protected ArrayList<CachedRowSetImpl> rowSets = new ArrayList<>();
+	protected JoinRowSet jrs;
+	protected String currentQuery;
+	protected MasterServer master;
 	boolean occupied = false;
 	int count = 0;
 	
@@ -25,13 +27,15 @@ public class JoinProcessor {
 	 * Otherwise, the processor won't finish!
 	 * @param tables
 	 */
-	public JoinProcessor(HashMap<String, String> joinAttrs, String query, MasterServer master, String... tables){
+	public BasicJoinProcessor(HashMap<String, String> joinAttrs, String query, MasterServer master, String... tables){
 		count = tables.length;
 		currentQuery = query;
+		this.master = master;
+		
 		for(String t: tables){
 			ArrayList<Integer> ints = new ArrayList<>();
 			requestList.add(ints);
-			indices.add(t);
+			indices.add(t.toLowerCase());
 			rowSets.add(null);
 			this.joinAttrs = joinAttrs;
 			try {
@@ -51,26 +55,8 @@ public class JoinProcessor {
 		occupied = false;
 	}
 	
-	private boolean removeRequested(String table, int serverId){
-		int index = getIndex(table);
-		
-		int y = 0;
-		for(int id: requestList.get(index)){
-			if(id == serverId) break;
-			y++;
-		}
-		requestList.get(index).remove(y);
-		
-		if(requestList.get(index).size() == 0){
-			count--;
-			if(count == 0){
-				return true;
-			}
-		}
-		return false;	
-	}
-
 	private int getIndex(String table) {
+		table = table.toLowerCase();
 		int index = -1;
 		for(String str: indices){
 			index++;
@@ -101,39 +87,18 @@ public class JoinProcessor {
 				e.printStackTrace();
 			}	
 		}
-		if(finished){		
+		if(finished){	
 			joinRowSets();
 		}
 	}
 	
-	private void joinRowSets() {
-		try {
-			CustomLog.println("Joining results....");
-			for(int i = 0; i < rowSets.size(); i++){
-				rowSets.get(i).beforeFirst();
-				rowSets.get(i).setMatchColumn(getJoinAttrIndex(indices.get(i)));
-				jrs.addRowSet(rowSets.get(i));
-			}
-			jrs.beforeFirst();
-			CustomLog.println("--------------------------------");
-			CustomLog.println("|"+currentQuery+"|");
-			CustomLog.println("--------------------------------");
-			CustomLog.println("-----------RESULT---------------");
-			CustomLog.println("----------" + CustomLog.getTraffic(true) + " bytes -----------");
-			CustomLog.println("--------------------------------");
-			while(jrs.next()){
-				for(int i = 1; i <= jrs.getMetaData().getColumnCount(); i++){
-					CustomLog.print(jrs.getString(i) + " | ");
-				}
-				CustomLog.print("\n");
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 
-	private int getJoinAttrIndex(String table) {
+	/**
+	 * returns the index of the designated join attribute
+	 * @param table table name
+	 * @return index of the attribute
+	 */
+	protected int getJoinAttrIndex(String table) {
 		ResultSetMetaData rsm;
 		try {
 			rsm = rowSets.get(getIndex(table)).getMetaData();
@@ -156,4 +121,25 @@ public class JoinProcessor {
 			return null;
 		}
 	}
+	
+	protected boolean removeRequested(String table, int serverId){
+		int index = getIndex(table);
+		
+		int y = 0;
+		for(int id: requestList.get(index)){
+			if(id == serverId) break;
+			y++;
+		}
+		requestList.get(index).remove(y);
+		
+		if(requestList.get(index).size() == 0){
+			count--;
+			if(count == 0){
+				return true;
+			}
+		}
+		return false;	
+	}
+
+	protected void joinRowSets(){}
 }

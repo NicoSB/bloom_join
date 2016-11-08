@@ -3,7 +3,6 @@ package com.nicosb.uni.bloom_join;
 import java.io.ObjectInputStream;
 
 import java.io.ObjectOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.Connection;
@@ -60,54 +59,16 @@ public class SlaveServer {
 						break;
 					case MasterServer.CHAR_TUPLES:
 						CustomLog.println("received tuple request from master");						
-						int k_c = Integer.valueOf(header.substring(header.indexOf("k=")+2,header.indexOf(",")));
-						int m_c = Integer.valueOf(header.substring(header.indexOf("m=")+2));
-						
-						String query = (String)TrafficLogger.readObject(input);
-						byte[] bloomRequest = (byte[])TrafficLogger.readObject(input);
-						
-						ArrayList<String> results = new ArrayList<>();
-						
-						if(cache.containsKey(query)){
-							ResultSet cachedRS = cache.get(query);
-							cachedRS.beforeFirst();
-							CustomLog.println(query);
-							while(cachedRS.next()){
-								if(Bloomer.is_in(getStrScore(cachedRS.getString(1)), BitSet.valueOf(bloomRequest), k_c, m_c)) results.add(cachedRS.getString(1));
-							}
-							cache.remove(query);
+						if(header.contains("k=")){
+							queryBloomed(input, header);
 						}
-						Class.forName("org.postgresql.Driver");
-						String url = "jdbc:postgresql://localhost/bloom_join";
-						Properties props = new Properties();
-						props.setProperty("user", System.getenv("DB_USER"));
-						props.setProperty("password", System.getenv("DB_PASSWORD"));
-						
-						Connection conn = DriverManager.getConnection(url, props);
-
-						String table = query.substring(query.indexOf("FROM ") + "FROM ".length());
-						String attr = query.substring(query.indexOf("DISTINCT ") + "DISTINCT ".length(), query.indexOf("FROM"));
-						String select_query = "SELECT * FROM " + table + " WHERE " + attr + " IN(";
-						
-						for(int i = 0; i < results.size(); i++){
-							select_query += "?,";
-						}						
-
-						select_query = select_query.substring(0, select_query.length() - 1);
-						select_query += ")";
-						
-						PreparedStatement prep = conn.prepareStatement(select_query);
-						prep = conn.prepareStatement(select_query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-						for(int i = 1; i  <= results.size(); i++){
-							prep.setString(i, results.get(i-1));
-						}			
-						
-						ResultSet rs = prep.executeQuery();
-						CachedRowSetImpl cr = new CachedRowSetImpl();	
-						cr.populate(rs);
-						
-						output.writeObject(MasterServer.CHAR_TUPLES+";t="+table);
-						output.writeObject(cr);
+						else if(header.contains("a=")){
+							queryNotBloomed(input, header);
+						}
+						else{			
+							String query = TrafficLogger.readObject(input);
+							executeQuery(query);
+						}
 						break;
 					case MasterServer.CHAR_TERMINATE:
 						masterSocket.close();
@@ -119,18 +80,108 @@ public class SlaveServer {
 		}
 	}
 
+	private void queryNotBloomed(ObjectInputStream input, String header) {
+		try {
+			String[] vals = (String[])TrafficLogger.readObject(input);
+			String table = header.substring(header.indexOf("t=")+"t=".length(), header.indexOf("a="));
+			String attr = header.substring(header.indexOf("a=")+"a=".length());
+			String query = "SELECT * FROM " + table + " WHERE " + attr + " IN(";
+			Connection conn = establishDBConnection();	
+			
+			for(int i = 0; i < vals.length; i++){
+				query += "?,";
+			}						
+
+			query = query.substring(0, query.length() - 1);
+			query += ")";
+			
+			PreparedStatement prep = conn.prepareStatement(query);
+			prep = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			for(int i = 1; i  <= vals.length; i++){
+				prep.setString(i, vals[i-1]);
+			}	
+
+			ResultSet rs = prep.executeQuery();
+			CachedRowSetImpl cr = new CachedRowSetImpl();	
+			cr.populate(rs);
+
+			output.writeObject(MasterServer.CHAR_TUPLES+";t="+table);
+			output.writeObject(cr);
+			
+			} catch (ClassNotFoundException | SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		}
+	}
+
+	private void queryBloomed(ObjectInputStream input, String header)
+			throws SQLException, ClassNotFoundException, IOException {
+		int k_c = Integer.valueOf(header.substring(header.indexOf("k=")+2,header.indexOf(",")));
+		int m_c = Integer.valueOf(header.substring(header.indexOf("m=")+2));
+		
+		String query = (String)TrafficLogger.readObject(input);
+		byte[] bloomRequest = (byte[])TrafficLogger.readObject(input);
+		
+		ArrayList<String> results = new ArrayList<>();
+		
+		if(cache.containsKey(query)){
+			ResultSet cachedRS = cache.get(query);
+			cachedRS.beforeFirst();
+			CustomLog.println(query);
+			while(cachedRS.next()){
+				if(Bloomer.is_in(getStrScore(cachedRS.getString(1)), BitSet.valueOf(bloomRequest), k_c, m_c)) results.add(cachedRS.getString(1));
+			}
+			cache.remove(query);
+		}
+		else{
+			// TODO fetch results when not cached
+		}
+		Connection conn = establishDBConnection();
+
+		String table = query.substring(query.indexOf("FROM ") + "FROM ".length());
+		String attr = query.substring(query.indexOf("DISTINCT ") + "DISTINCT ".length(), query.indexOf("FROM"));
+		String select_query = "SELECT * FROM " + table + " WHERE " + attr + " IN(";
+		
+		for(int i = 0; i < results.size(); i++){
+			select_query += "?,";
+		}						
+
+		select_query = select_query.substring(0, select_query.length() - 1);
+		select_query += ")";
+		
+		PreparedStatement prep = conn.prepareStatement(select_query);
+		prep = conn.prepareStatement(select_query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+		for(int i = 1; i  <= results.size(); i++){
+			prep.setString(i, results.get(i-1));
+		}			
+		
+		ResultSet rs = prep.executeQuery();
+		CachedRowSetImpl cr = new CachedRowSetImpl();	
+		cr.populate(rs);
+		
+		output.writeObject(MasterServer.CHAR_TUPLES+";t="+table);
+		output.writeObject(cr);
+	}
+
+	private Connection establishDBConnection() throws ClassNotFoundException, SQLException {
+		Class.forName("org.postgresql.Driver");
+		String url = "jdbc:postgresql://localhost/bloom_join";
+		Properties props = new Properties();
+		props.setProperty("user", System.getenv("DB_USER"));
+		props.setProperty("password", System.getenv("DB_PASSWORD"));
+		
+		Connection conn = DriverManager.getConnection(url, props);
+		return conn;
+	}
+
 	private void send(ObjectOutputStream output, String query, int k, int m) {
 		try {
-			CustomLog.println("executing " + query);
-			Class.forName("org.postgresql.Driver");
-			String url = "jdbc:postgresql://localhost/bloom_join";
-			Properties props = new Properties();
-			props.setProperty("user", System.getenv("DB_USER"));
-			props.setProperty("password", System.getenv("DB_PASSWORD"));
-			
 			String table = query.substring(query.indexOf("FROM ") + "FROM ".length());
 			
-			Connection conn = DriverManager.getConnection(url, props);
+			Connection conn = establishDBConnection();
 			PreparedStatement prep = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 	
 			ResultSet cachedRS = prep.executeQuery();
@@ -163,5 +214,19 @@ public class SlaveServer {
 			score += string.charAt(i);
 		}
 		return score;
+	}
+	
+	private void executeQuery(String query) throws ClassNotFoundException, SQLException, IOException{
+		Connection conn = establishDBConnection();	
+
+		PreparedStatement prep = conn.prepareStatement(query);
+		ResultSet rs = conn.createStatement().executeQuery(query);
+		prep = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);		
+		String table = prep.getMetaData().getTableName(1);
+		CachedRowSetImpl cr = new CachedRowSetImpl();	
+		cr.populate(rs);
+
+		output.writeObject(MasterServer.CHAR_TUPLES+";t="+table);
+		output.writeObject(cr);
 	}
 }	
