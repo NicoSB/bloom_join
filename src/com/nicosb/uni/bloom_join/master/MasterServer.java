@@ -1,4 +1,4 @@
-package com.nicosb.uni.bloom_join;
+package com.nicosb.uni.bloom_join.master;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -15,8 +15,14 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.nicosb.uni.bloom_join.Assignment;
+import com.nicosb.uni.bloom_join.BloomInformation;
+import com.nicosb.uni.bloom_join.CustomLog;
+import com.nicosb.uni.bloom_join.QueryInformation;
+import com.nicosb.uni.bloom_join.exception.InvalidQueryException;
 
-public class MasterServer implements Server{
+
+public class MasterServer{
 	public static final char CHAR_BLOOMFILTER = 'b';
 	public static final char CHAR_TUPLES = 't';
 	public static final char CHAR_TERMINATE = 'q';
@@ -26,6 +32,7 @@ public class MasterServer implements Server{
 	private HashMap<Integer, Socket> socketMap = new HashMap<>();
 	private HashMap<Integer, ObjectOutputStream> ostreamMap = new HashMap<>();
 	private ResultSet siteTables;
+	private float errorRate = 0.05f;
 	public Assignment currentAssignment;
 	public String latestQuery;
 	
@@ -51,7 +58,6 @@ public class MasterServer implements Server{
 		
 	}
 	
-	@Override
 	public void run(String hostName, int port) {
 		try {
 			@SuppressWarnings("resource")
@@ -96,7 +102,9 @@ public class MasterServer implements Server{
 				CustomLog.printToConsole=true;
 				CustomLog.printToFile=false;
 				latestQuery = applyOptions(latestQuery);
-				currentAssignment.setCachedQuery(new QueryInformation(latestQuery));
+				QueryInformation qi = new QueryInformation(latestQuery);
+				currentAssignment.setBloomInformation(new BloomInformation(qi, errorRate));
+				currentAssignment.setCachedQuery(qi);
 				siteTables = QueryEvaluator.evaluate(currentAssignment.getCachedQuery(), this);
 			} catch (InvalidQueryException e) {
 				CustomLog.println("ERROR: Invalid input!");
@@ -106,17 +114,18 @@ public class MasterServer implements Server{
 
 		
 	private String applyOptions(String query) {
-		Pattern p = Pattern.compile("-[ldn]");
+		Pattern p = Pattern.compile(" -([ldn]|(p [0-9].[0-9]+))");
 		Matcher m = p.matcher(query);
 		while(m.find()){
 			String option = m.group();
 			query = m.replaceFirst("");
-			switch(option.charAt(1)){
+			char c = option.charAt(2);
+			switch(c){
 					// log to file
 				case 'l':
 					CustomLog.printToFile = true;
 					break;
-					// discard log
+					// disable log
 				case 'd':
 					CustomLog.printToConsole = false;
 					break;
@@ -124,7 +133,11 @@ public class MasterServer implements Server{
 				case 'n':
 					currentAssignment.setBloom(false);
 					break;
+				case 'p':
+					errorRate = Float.valueOf(option.substring(3));
+					break;
 			}
+			m = p.matcher(query);
 		}
 		return query.trim();
 	}
@@ -154,7 +167,7 @@ public class MasterServer implements Server{
 				Socket slave = getSocket(siteTables.getInt(1));
 				if(slave != null){
 					ObjectOutputStream out = ostreamMap.get(siteTables.getInt(1));
-					out.writeObject("t;k=6,m=2000");
+					out.writeObject("t;k="+currentAssignment.getBloomInformation().getHashCount()+",m="+currentAssignment.getBloomInformation().getFilterSize());
 					String attr = currentAssignment.getCachedQuery().getJoinAttributes().get(siteTables.getString(2));
 					out.writeObject("SELECT DISTINCT " + attr + " FROM " + siteTables.getString(2));
 					out.writeObject(bloomfilter);

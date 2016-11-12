@@ -5,8 +5,8 @@ import java.util.HashMap;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.nicosb.uni.bloom_join.InvalidQueryException;
 import com.nicosb.uni.bloom_join.QueryInformation;
+import com.nicosb.uni.bloom_join.exception.InvalidQueryException;
 
 public class QueryInformationTest {
 

@@ -1,4 +1,4 @@
-package com.nicosb.uni.bloom_join;
+package com.nicosb.uni.bloom_join.slave;
 
 import java.util.BitSet;
 import java.util.LinkedList;

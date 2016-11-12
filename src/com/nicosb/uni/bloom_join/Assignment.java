@@ -10,6 +10,7 @@ public class Assignment {
 	private BloomProcessor activeProcessor;
 	private SemiJoinProcessor semiJoinProcessor;
 	private JoinProcessor joinProcessor;
+	private BloomInformation bloomInformation;
 	private boolean bloom = true;
 	
 	
@@ -61,5 +62,13 @@ public class Assignment {
 		if(activeProcessor != null) activeProcessor.addRequested(table, serverId);
 		if(joinProcessor != null) joinProcessor.addRequested(table, serverId);
 		if(semiJoinProcessor != null) semiJoinProcessor.addRequested(table, serverId);
+	}
+
+	public BloomInformation getBloomInformation(){
+		return bloomInformation;
+	}
+	
+	public void setBloomInformation(BloomInformation bloomInformation){
+		this.bloomInformation = bloomInformation;
 	}
 }

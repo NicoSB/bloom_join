@@ -1,4 +1,4 @@
-package com.nicosb.uni.bloom_join;
+package com.nicosb.uni.bloom_join.exception;
 
 public class InvalidQueryException extends Exception {
     /**

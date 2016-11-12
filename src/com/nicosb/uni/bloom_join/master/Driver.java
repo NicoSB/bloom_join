@@ -1,4 +1,4 @@
-package com.nicosb.uni.bloom_join;
+package com.nicosb.uni.bloom_join.master;
 
 public class Driver {
 	public static void main(String... args){

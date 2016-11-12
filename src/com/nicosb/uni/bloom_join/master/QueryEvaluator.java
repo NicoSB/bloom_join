@@ -1,4 +1,4 @@
-package com.nicosb.uni.bloom_join;
+package com.nicosb.uni.bloom_join.master;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import com.nicosb.uni.bloom_join.QueryInformation;
 import com.nicosb.uni.bloom_join.processors.BloomProcessor;
 import com.nicosb.uni.bloom_join.processors.JoinProcessor;
 import com.nicosb.uni.bloom_join.processors.SemiJoinProcessor;
@@ -36,7 +37,7 @@ public class QueryEvaluator {
 					ObjectOutputStream out = master.getOStream(rs.getInt(1));
 					String attr = qi.getJoinAttributes().get(rs.getString(2));
 					
-					if(master.isBloomed()) out.writeObject("b;k=6,m=2000");
+					if(master.isBloomed()) out.writeObject("b;k="+master.currentAssignment.getBloomInformation().getHashCount()+",m=" + master.currentAssignment.getBloomInformation().getFilterSize());
 					else out.writeObject("t;t="+rs.getString(2));
 					
 					out.writeObject("SELECT DISTINCT " + attr + " FROM " + rs.getString(2));

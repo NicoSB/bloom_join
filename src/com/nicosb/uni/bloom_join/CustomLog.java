@@ -50,6 +50,43 @@ public class CustomLog {
 				e.printStackTrace();
 			}
 		}
+	}	
+	public static <T> void println(T str, boolean forceConsole){
+		if(forceConsole || printToConsole){
+			System.out.println(str);
+		}
+		if(printToFile){
+			try {
+				PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
+				out.write(str + "\n");
+				out.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+		}
+	}
+	
+	public static <T> void print(T str, boolean forceConsole){
+		if(forceConsole || printToConsole){
+			System.out.print(str);
+		}
+		if(printToFile){
+			try {
+				PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
+				out.write(String.valueOf(str));
+				out.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public static void sizeLog(Object o){

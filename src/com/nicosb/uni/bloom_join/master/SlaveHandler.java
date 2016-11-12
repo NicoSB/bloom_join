@@ -1,4 +1,4 @@
-package com.nicosb.uni.bloom_join;
+package com.nicosb.uni.bloom_join.master;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -11,6 +11,8 @@ import java.sql.SQLException;
 import java.util.BitSet;
 import java.util.Properties;
 
+import com.nicosb.uni.bloom_join.CustomLog;
+import com.nicosb.uni.bloom_join.TrafficLogger;
 import com.sun.rowset.CachedRowSetImpl;
 
 public class SlaveHandler implements Runnable {
@@ -98,6 +100,9 @@ public class SlaveHandler implements Runnable {
 	 * <pre> tables contains the tables of a server separated by ';'
 	 * @param port the server's port, serves as an identifier in a local environment
 	 * @param tables the string containing the server's table's separated by ';'
+	 * 			as well as tablename and count separated by '<'
+	 * 
+	 * example: table1<1337;table2<420
 	 * 
 	 * registers the server by inserting its properties into the master's register
 	 */
@@ -110,10 +115,12 @@ public class SlaveHandler implements Runnable {
 			props.setProperty("user", System.getenv("DB_USER"));
 			props.setProperty("password", System.getenv("DB_PASSWORD"));
 			conn = DriverManager.getConnection(url, props);
-			PreparedStatement prep = conn.prepareStatement("INSERT INTO sitetables(siteport, tablename) VALUES(" + master.getSocketCount() + ", ?)");
+			PreparedStatement prep = conn.prepareStatement("INSERT INTO sitetables(siteport, tablename, count) VALUES(" + master.getSocketCount() + ", ?,?)");
 
 			for(String t: tables_split){
-				prep.setString(1, t.toLowerCase());
+				String[] split = t.split("<");
+				prep.setString(1, split[0].toLowerCase());
+				prep.setInt(2, Integer.valueOf(split[1]));
 				prep.execute();
 			}
 			conn.close();

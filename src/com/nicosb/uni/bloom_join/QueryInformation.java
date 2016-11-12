@@ -1,13 +1,23 @@
 package com.nicosb.uni.bloom_join;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.nicosb.uni.bloom_join.exception.InvalidQueryException;
+import com.nicosb.uni.bloom_join.master.QueryValidator;
 
 public class QueryInformation {
 	private String[] tables;
 	private HashMap<String, String> joinAttributes;
+	private int maxJoinSize;
 		
 	public QueryInformation(String query) throws InvalidQueryException{
 		if(!QueryValidator.validate(query)){
@@ -56,9 +66,48 @@ public class QueryInformation {
 			joinSubstring = joinSubstring.substring(joinSubstring.indexOf(" ")).trim();
 		}
 		
+		try {
+			calculateMaxJoinSize(join_tables);
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		String[] ret = new String[join_tables.size()];
 		join_tables.toArray(ret);
 		return ret;
+	}
+
+	private void calculateMaxJoinSize(ArrayList<String> join_tables) throws ClassNotFoundException, SQLException {
+		Class.forName("org.postgresql.Driver");
+		String url = "jdbc:postgresql://localhost/bloom_join";
+		Properties props = new Properties();
+		props.setProperty("user", System.getenv("DB_USER"));
+		props.setProperty("password", System.getenv("DB_PASSWORD"));
+			
+		Connection conn = DriverManager.getConnection(url, props);
+			
+		PreparedStatement prep;
+		String query = "SELECT min(count) FROM sitetables WHERE tablename IN (";
+		for(int i = 0; i < join_tables.size(); i++){
+			query += "?,";
+		}
+		query = query.substring(0, query.length() - 1);
+		query += ")";
+		
+		prep = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+		
+		int i = 1;
+		for(String t: join_tables){
+			prep.setString(i, t);
+			i++;
+		}
+		
+		ResultSet rs = prep.executeQuery();
+		rs.first();
+		maxJoinSize = rs.getInt(1);
 	}
 
 	public String[] getTables() {
@@ -75,6 +124,10 @@ public class QueryInformation {
 
 	public void setJoinAttributes(HashMap<String, String> joinAttributes) {
 		this.joinAttributes = joinAttributes;
+	}
+
+	public int getMaxJoinSize(QueryInformation qi) {
+		return maxJoinSize;
 	}
 	
 	

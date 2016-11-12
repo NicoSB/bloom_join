@@ -1,4 +1,4 @@
-package com.nicosb.uni.bloom_join.processors;
+package com.nicosb.uni.bloom_join.master.processors;
 
 import java.sql.SQLException;
 import java.util.HashMap;

@@ -1,0 +1,171 @@
+psql>>>received message from slave 0(b)
+received bloom filter from 0 for table country
+00100001000000010000000000000000000000000000000000000000000000001111111001111111010011110000010000000000000000000000000000000000010101001111111111111111111111110101111110111111000100100000000001001000110110101110111111111111111111110111111111101111110000100000010001010000010001010101010101011111011101111111111101110111010111010001000101010101010001010000010000000000000000000000000000000000000000000100010000011001110101110111010001011101110101110111010101011101110101110011010101011101010101100000010001011001100100100010000000001000000000000000000000000000000000000001000001010100000100010001010000000101010101110101010101011101100001100111010101001000100100100010010001001001100100100010010001001001100100100000010001001000100000000010010000000000000000000010010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010001001000000100100000010001001000100100000000000000001001100100100010010001001001100000000000000000000001
+received message from slave 0(b)
+received bloom filter from 0 for table geo_desert
+000000010000000000000000000000000000000000000000000000000000000000000000000000000000010000000100000000000000000000000000000000000000000001000000001100000101101000010111000000000001000000000000000000000100000001000000101110000100010000011111010000100100000000000000010000000000000000010000000000000000010101000100000100010001010100000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000010100010000001101010100010000000110000101011100000101010011010000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000100000000001001001000100000010000000000000000000100010010010001001000000000000010000000000000000000000000000000000000000100
+Joined all bloom filters: 
+000000010000000000000000000000000000000000000000000000000000000000000000000000000000010000000100000000000000000000000000000000000000000001000000001100000101101000010111000000000001000000000000000000000100000001000000101110000100010000011111010000100100000000000000010000000000000000010000000000000000010101000100000100010001010100000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000010100010000001101010100010000000110000101011100000101010011010000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000100000000001001001000100000010000000000000000000100010010010001001000000000000010000000000000000000000000000000000000000100
+received message from slave 0(t)
+received message from slave 0(t)
+Joining results....
+--------------------------------
+|SELECT * FROM geo_Desert JOIN country ON geo_Desert.country = country.code|
+--------------------------------
+-----------RESULT---------------
+----------37175 bytes -----------
+--------------------------------
+Atacama | RCH | Chile | Chile | Santiago | Chile | 756950.0 | 14333258 | 
+Baja California Desert | MEX | Baja California | Mexico | Mexico City | Distrito Federal | 1972550.0 | 95772462 | 
+Chihuahua | USA | Texas | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Chihuahua | USA | New Mexico | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Chihuahua | USA | Arizona | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Sonora | USA | California | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Sonora | USA | Arizona | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Sonora | MEX | Sonora | Mexico | Mexico City | Distrito Federal | 1972550.0 | 95772462 | 
+Sonora | MEX | Chihuahua | Mexico | Mexico City | Distrito Federal | 1972550.0 | 95772462 | 
+Mojave | USA | Utah | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Mojave | USA | Nevada | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Mojave | USA | California | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Mojave | USA | Arizona | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Great Basin | USA | Utah | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Great Basin | USA | Nevada | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Great Basin | USA | California | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Colorado Plateau | USA | Utah | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Colorado Plateau | USA | New Mexico | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Colorado Plateau | USA | Colorado | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Colorado Plateau | USA | Arizona | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Great Salt Lake Desert | USA | Utah | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Owyhee | USA | Oregon | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Owyhee | USA | Nevada | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Owyhee | USA | Idaho | United States | Washington | Distr. Columbia | 9372610.0 | 266476278 | 
+Sturt Desert | AUS | Queensland | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Sturt Desert | AUS | Northern Territory | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Sturt Desert | AUS | New South Wales | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Tanami | AUS | Northern Territory | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Red Centre | AUS | Western Australia | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Red Centre | AUS | South Australia | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Red Centre | AUS | Northern Territory | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Simpson Desert | AUS | South Australia | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Simpson Desert | AUS | Queensland | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Simpson Desert | AUS | Northern Territory | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Nullarbor Plain | AUS | Western Australia | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Nullarbor Plain | AUS | South Australia | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Great Victoria Desert | AUS | Western Australia | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Great Victoria Desert | AUS | South Australia | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Gibson Desert | AUS | Western Australia | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Great Sandy Desert | AUS | Western Australia | Australia | Canberra | Australia Capital Territory | 7686850.0 | 18260863 | 
+Ordos | TJ | Ningxia Huizu | China | Beijing | Beijing (munic.) | 9596960.0 | 1210004956 | 
+Ordos | TJ | Nei Monggol | China | Beijing | Beijing (munic.) | 9596960.0 | 1210004956 | 
+Ordos | TJ | Shaanxi | China | Beijing | Beijing (munic.) | 9596960.0 | 1210004956 | 
+Gobi | MNG | Mongolia | Mongolia | Ulaanbaatar | Mongolia | 1565000.0 | 2496617 | 
+Gobi | TJ | Ningxia Huizu | China | Beijing | Beijing (munic.) | 9596960.0 | 1210004956 | 
+Gobi | TJ | Nei Monggol | China | Beijing | Beijing (munic.) | 9596960.0 | 1210004956 | 
+Gobi | TJ | Gansu | China | Beijing | Beijing (munic.) | 9596960.0 | 1210004956 | 
+Qaidam | TJ | Qinghai | China | Beijing | Beijing (munic.) | 9596960.0 | 1210004956 | 
+Kum Tagh | TJ | Xinjiang Uygur | China | Beijing | Beijing (munic.) | 9596960.0 | 1210004956 | 
+Gurbantunggut | TJ | Xinjiang Uygur | China | Beijing | Beijing (munic.) | 9596960.0 | 1210004956 | 
+TaklaMakan | TJ | Xinjiang Uygur | China | Beijing | Beijing (munic.) | 9596960.0 | 1210004956 | 
+Mujunkum | KAZ | Zhambyl | Kazakstan | Almaty | Almaty (munic.) | 2717300.0 | 16916463 | 
+Mujunkum | KAZ | Qyzylorda | Kazakstan | Almaty | Almaty (munic.) | 2717300.0 | 16916463 | 
+Kysylkum | KAZ | Qyzylorda | Kazakstan | Almaty | Almaty (munic.) | 2717300.0 | 16916463 | 
+Kysylkum | UZB | Qaraqalpoghiston | Uzbekistan | Tashkent | Toshkent | 447400.0 | 23418381 | 
+Kysylkum | UZB | Samarqand | Uzbekistan | Tashkent | Toshkent | 447400.0 | 23418381 | 
+Kysylkum | UZB | Jizzakh | Uzbekistan | Tashkent | Toshkent | 447400.0 | 23418381 | 
+Karakum | UZB | Qaraqalpoghiston | Uzbekistan | Tashkent | Toshkent | 447400.0 | 23418381 | 
+Karakum | UZB | Samarqand | Uzbekistan | Tashkent | Toshkent | 447400.0 | 23418381 | 
+Karakum | TM | Mary | Turkmenistan | Ashgabat | Ahal | 488100.0 | 4149283 | 
+Karakum | TM | Leban | Turkmenistan | Ashgabat | Ahal | 488100.0 | 4149283 | 
+Karakum | TM | Dashhowuz | Turkmenistan | Ashgabat | Ahal | 488100.0 | 4149283 | 
+Karakum | TM | Balkan | Turkmenistan | Ashgabat | Ahal | 488100.0 | 4149283 | 
+Karakum | TM | Ahal | Turkmenistan | Ashgabat | Ahal | 488100.0 | 4149283 | 
+Ust Urt | KAZ | Mangghystau | Kazakstan | Almaty | Almaty (munic.) | 2717300.0 | 16916463 | 
+Ust Urt | KAZ | Aqtobe | Kazakstan | Almaty | Almaty (munic.) | 2717300.0 | 16916463 | 
+Ust Urt | UZB | Qaraqalpoghiston | Uzbekistan | Tashkent | Toshkent | 447400.0 | 23418381 | 
+Ryn | KAZ | Batys Qazaqstan | Kazakstan | Almaty | Almaty (munic.) | 2717300.0 | 16916463 | 
+Ryn | KAZ | Atyrau | Kazakstan | Almaty | Almaty (munic.) | 2717300.0 | 16916463 | 
+Ryn | R | Astrakhanskaya oblast | Russia | Moscow | Moskva | 1.70752E7 | 148178487 | 
+Ryn | R | Rep. of Kalmykiya | Russia | Moscow | Moskva | 1.70752E7 | 148178487 | 
+Thar | IND | Rajasthan | India | New Delhi | Delhi | 3287590.0 | 952107694 | 
+Thar | IND | Punjab | India | New Delhi | Delhi | 3287590.0 | 952107694 | 
+Thar | IND | Haryana | India | New Delhi | Delhi | 3287590.0 | 952107694 | 
+Thar | IND | Gujarat | India | New Delhi | Delhi | 3287590.0 | 952107694 | 
+Thar | PK | Pakistan | Pakistan | Islamabad | Pakistan | 803940.0 | 129275660 | 
+Rigestan | PK | Pakistan | Pakistan | Islamabad | Pakistan | 803940.0 | 129275660 | 
+Rigestan | AFG | Afghanistan | Afghanistan | Kabul | Afghanistan | 647500.0 | 22664136 | 
+Dascht-e-Margoh | AFG | Afghanistan | Afghanistan | Kabul | Afghanistan | 647500.0 | 22664136 | 
+Dascht-e-Lut | IR | Yazd | Iran | Tehran | Tehran | 1648000.0 | 66094264 | 
+Dascht-e-Lut | IR | Sistan e Baluchestan | Iran | Tehran | Tehran | 1648000.0 | 66094264 | 
+Dascht-e-Lut | IR | Khorasan | Iran | Tehran | Tehran | 1648000.0 | 66094264 | 
+Dascht-e-Lut | IR | Kerman | Iran | Tehran | Tehran | 1648000.0 | 66094264 | 
+Dascht-e-Lut | IR | Esfahan | Iran | Tehran | Tehran | 1648000.0 | 66094264 | 
+Dascht-e-Kavir | IR | Yazd | Iran | Tehran | Tehran | 1648000.0 | 66094264 | 
+Dascht-e-Kavir | IR | Tehran | Iran | Tehran | Tehran | 1648000.0 | 66094264 | 
+Dascht-e-Kavir | IR | Semnan | Iran | Tehran | Tehran | 1648000.0 | 66094264 | 
+Dascht-e-Kavir | IR | Khorasan | Iran | Tehran | Tehran | 1648000.0 | 66094264 | 
+Dascht-e-Kavir | IR | Esfahan | Iran | Tehran | Tehran | 1648000.0 | 66094264 | 
+Rub Al Chali | YE | Yemen | Yemen | Sanaa | Yemen | 527970.0 | 13483178 | 
+Rub Al Chali | UAE | Umm al Qaywayn | United Arab Emirates | Abu Dhabi | Abu Dhabi | 75581.0 | 3057337 | 
+Rub Al Chali | UAE | Ash Shariqah | United Arab Emirates | Abu Dhabi | Abu Dhabi | 75581.0 | 3057337 | 
+Rub Al Chali | UAE | Ras al Khaymah | United Arab Emirates | Abu Dhabi | Abu Dhabi | 75581.0 | 3057337 | 
+Rub Al Chali | UAE | Al Fujayrah | United Arab Emirates | Abu Dhabi | Abu Dhabi | 75581.0 | 3057337 | 
+Rub Al Chali | UAE | Dubayy | United Arab Emirates | Abu Dhabi | Abu Dhabi | 75581.0 | 3057337 | 
+Rub Al Chali | UAE | Abu Dhabi | United Arab Emirates | Abu Dhabi | Abu Dhabi | 75581.0 | 3057337 | 
+Rub Al Chali | OM | Oman | Oman | Muscat | Oman | 212460.0 | 2186548 | 
+Rub Al Chali | SA | Saudi Arabia | Saudi Arabia | Riyadh | Saudi Arabia | 1960582.0 | 19409058 | 
+Nefud | SA | Saudi Arabia | Saudi Arabia | Riyadh | Saudi Arabia | 1960582.0 | 19409058 | 
+Syrian Desert | SYR | Syria | Syria | Damascus | Syria | 185180.0 | 15608648 | 
+Syrian Desert | SA | Saudi Arabia | Saudi Arabia | Riyadh | Saudi Arabia | 1960582.0 | 19409058 | 
+Syrian Desert | JOR | Jordan | Jordan | Amman | Jordan | 89213.0 | 4212152 | 
+Syrian Desert | IRQ | Al Anbar | Iraq | Baghdad | Baghdad | 437072.0 | 21422292 | 
+Negev | IL | South | Israel | Jerusalem | Central | 20770.0 | 5421995 | 
+Nubian Desert | SUD | ash Sharqiyah | Sudan | Khartoum | al Khartum | 2505810.0 | 31547543 | 
+Arabian Desert | ET | El Bahr el Ahmar | Egypt | Cairo | El Qahira | 1001450.0 | 63575107 | 
+Darfur | SUD | Darfur | Sudan | Khartoum | al Khartum | 2505810.0 | 31547543 | 
+Libyan Desert | SUD | ash Shamaliyah | Sudan | Khartoum | al Khartum | 2505810.0 | 31547543 | 
+Libyan Desert | SUD | Darfur | Sudan | Khartoum | al Khartum | 2505810.0 | 31547543 | 
+Libyan Desert | LAR | Libya | Libya | Tripoli | Libya | 1759540.0 | 5445436 | 
+Libyan Desert | ET | El Minya | Egypt | Cairo | El Qahira | 1001450.0 | 63575107 | 
+Libyan Desert | ET | El Giza | Egypt | Cairo | El Qahira | 1001450.0 | 63575107 | 
+Libyan Desert | ET | Beni Suef | Egypt | Cairo | El Qahira | 1001450.0 | 63575107 | 
+Libyan Desert | ET | El Wadi el Jadid | Egypt | Cairo | El Qahira | 1001450.0 | 63575107 | 
+Libyan Desert | ET | Matruh | Egypt | Cairo | El Qahira | 1001450.0 | 63575107 | 
+Erdi Ennedi | TCH | Chad | Chad | NDjamena | Chad | 1284000.0 | 6976845 | 
+Djourab | TCH | Chad | Chad | NDjamena | Chad | 1284000.0 | 6976845 | 
+Tenere | TCH | Chad | Chad | NDjamena | Chad | 1284000.0 | 6976845 | 
+Tenere | RN | Niger | Niger | Niamey | Niger | 1267000.0 | 9113001 | 
+Talak | RN | Niger | Niger | Niamey | Niger | 1267000.0 | 9113001 | 
+Erg Rebiana | LAR | Libya | Libya | Tripoli | Libya | 1759540.0 | 5445436 | 
+Fesan | LAR | Libya | Libya | Tripoli | Libya | 1759540.0 | 5445436 | 
+Hamada al-Hamra | LAR | Libya | Libya | Tripoli | Libya | 1759540.0 | 5445436 | 
+Erg Isaouane | DZ | Algeria | Algeria | Algier | Algeria | 2381740.0 | 29183032 | 
+Grand Erg Est | TN | Tunisia | Tunisia | Tunis | Tunisia | 163610.0 | 9019687 | 
+Grand Erg Est | DZ | Algeria | Algeria | Algier | Algeria | 2381740.0 | 29183032 | 
+Grand Erg Ouest | DZ | Algeria | Algeria | Algier | Algeria | 2381740.0 | 29183032 | 
+Azaouad | RN | Niger | Niger | Niamey | Niger | 1267000.0 | 9113001 | 
+Azaouad | RMM | Mali | Mali | Bamako | Mali | 1240000.0 | 9653261 | 
+Azaouad | DZ | Algeria | Algeria | Algier | Algeria | 2381740.0 | 29183032 | 
+Tanezrouft | RMM | Mali | Mali | Bamako | Mali | 1240000.0 | 9653261 | 
+Tanezrouft | DZ | Algeria | Algeria | Algier | Algeria | 2381740.0 | 29183032 | 
+Erg Chech | RMM | Mali | Mali | Bamako | Mali | 1240000.0 | 9653261 | 
+Erg Chech | DZ | Algeria | Algeria | Algier | Algeria | 2381740.0 | 29183032 | 
+Hamada du Draa | MA | Morocco | Morocco | Rabat | Morocco | 446550.0 | 29779156 | 
+Hamada du Draa | DZ | Algeria | Algeria | Algier | Algeria | 2381740.0 | 29183032 | 
+Erg Igidi | RIM | Mauritania | Mauritania | Nouakchott | Mauritania | 1030700.0 | 2336048 | 
+Erg Igidi | RMM | Mali | Mali | Bamako | Mali | 1240000.0 | 9653261 | 
+Erg Igidi | DZ | Algeria | Algeria | Algier | Algeria | 2381740.0 | 29183032 | 
+Saguia el-Hamra | WSA | Western Sahara | Western Sahara | El Aaiun | Western Sahara | 266000.0 | 222631 | 
+Erg Maqteir | RIM | Mauritania | Mauritania | Nouakchott | Mauritania | 1030700.0 | 2336048 | 
+Erg Ouarane | RIM | Mauritania | Mauritania | Nouakchott | Mauritania | 1030700.0 | 2336048 | 
+Trarza | RIM | Mauritania | Mauritania | Nouakchott | Mauritania | 1030700.0 | 2336048 | 
+Ferlo | SN | Tambacounda | Senegal | Dakar | Dakar | 196190.0 | 9092749 | 
+Ferlo | SN | Saint Louis | Senegal | Dakar | Dakar | 196190.0 | 9092749 | 
+Ferlo | SN | Louga | Senegal | Dakar | Dakar | 196190.0 | 9092749 | 
+Namib | NAM | Namibia | Namibia | Windhoek | Namibia | 825418.0 | 1677243 | 
+Kalahari | RSA | North West | South Africa | Pretoria | Gauteng | 1219912.0 | 41743459 | 
+Kalahari | RB | Botswana | Botswana | Gaborone | Botswana | 600370.0 | 1477630 | 
+Kalahari | Z | Western | Zambia | Lusaka | Lusaka | 752610.0 | 9159072 | 
+Kalahari | Z | Southern | Zambia | Lusaka | Lusaka | 752610.0 | 9159072 | 
+Kalahari | NAM | Namibia | Namibia | Windhoek | Namibia | 825418.0 | 1677243 | 
+Kalahari | ANG | Cuando Cubango | Angola | Luanda | Luanda | 1246700.0 | 10342899 | 
+Kalahari | ANG | Moxico | Angola | Luanda | Luanda | 1246700.0 | 10342899 | 

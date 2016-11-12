@@ -1,4 +1,4 @@
-package com.nicosb.uni.bloom_join;
+package com.nicosb.uni.bloom_join.slave;
 
 import java.io.ObjectInputStream;
 
@@ -16,6 +16,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Properties;
 
+import com.nicosb.uni.bloom_join.CustomLog;
+import com.nicosb.uni.bloom_join.TrafficLogger;
+import com.nicosb.uni.bloom_join.master.MasterServer;
 import com.sun.rowset.CachedRowSetImpl;
 
 public class SlaveServer {
@@ -37,12 +40,20 @@ public class SlaveServer {
 		      output.writeObject(""+MasterServer.CHAR_REGISTER);
 		     
 		      CustomLog.println("Connected to master on port " + masterPort);
+
+		      Connection conn = establishDBConnection();	
 		      // register with covered tables
 		      String tablesString = "";
 		      for(String s: tables){
 		    	  tablesString += s;
+		    	  tablesString += "<";
+		    	  tablesString += getCount(conn, s);
 		    	  tablesString += ";";
 		      }
+		      
+		      conn.close();
+		      
+		      
 		      output.writeObject(tablesString);
 		      ObjectInputStream input = new ObjectInputStream(masterSocket.getInputStream());
 		      do{	
@@ -78,6 +89,13 @@ public class SlaveServer {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+
+	private int getCount(Connection conn, String table) throws SQLException, ClassNotFoundException {
+		String query = "SELECT COUNT(*) FROM " + table;
+		ResultSet rs = conn.createStatement().executeQuery(query);
+		rs.next();
+		return rs.getInt(1);
 	}
 
 	private void queryNotBloomed(ObjectInputStream input, String header) {

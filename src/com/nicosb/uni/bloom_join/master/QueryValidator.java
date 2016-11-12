@@ -1,4 +1,4 @@
-package com.nicosb.uni.bloom_join;
+package com.nicosb.uni.bloom_join.master;
 
 public class QueryValidator {
 	public static boolean validate(String query){
