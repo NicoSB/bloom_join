@@ -150,7 +150,7 @@ public class SlaveServer {
 			cachedRS.beforeFirst();
 			CustomLog.println(query);
 			while(cachedRS.next()){
-				if(Bloomer.is_in(getStrScore(cachedRS.getString(1)), BitSet.valueOf(bloomRequest), k_c, m_c)) results.add(cachedRS.getString(1));
+				if(Bloomer.is_in(cachedRS.getString(1), BitSet.valueOf(bloomRequest), k_c, m_c)) results.add(cachedRS.getString(1));
 			}
 			cache.remove(query);
 		}
@@ -205,11 +205,11 @@ public class SlaveServer {
 			ResultSet cachedRS = prep.executeQuery();
 			cache.put(query, cachedRS);
 			
-			LinkedList<Integer> int_ll = new LinkedList<>();
+			LinkedList<String> ll = new LinkedList<>();
 			while(cachedRS.next()){
-				int_ll.add(getStrScore(cachedRS.getString(1)));
+				ll.add(cachedRS.getString(1));
 			}
-			BitSet bs = Bloomer.bloom(int_ll, k, m);
+			BitSet bs = Bloomer.bloom(ll, k, m);
 			byte[] b = bs.toByteArray();
 			output.writeObject("b;t="+table);
 			output.writeObject(b);
@@ -225,14 +225,14 @@ public class SlaveServer {
 			e.printStackTrace();
 		}
 	}
-
-	private Integer getStrScore(String string) {
-		int score = 0;
-		for(int i = 0; i < string.length(); i++){
-			score += string.charAt(i);
-		}
-		return score;
-	}
+//
+//	private Integer getStrScore(String string) {
+//		int score = 0;
+//		for(int i = 0; i < string.length(); i++){
+//			score += string.charAt(i);
+//		}
+//		return score;
+//	}
 	
 	private void executeQuery(String query) throws ClassNotFoundException, SQLException, IOException{
 		Connection conn = establishDBConnection();	
