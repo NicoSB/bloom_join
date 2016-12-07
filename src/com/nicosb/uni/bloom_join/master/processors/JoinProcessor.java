@@ -23,7 +23,19 @@ public class JoinProcessor extends BasicJoinProcessor{
 				jrs.addRowSet(rowSets.get(i));
 			}
 			jrs.beforeFirst();
-			printFinalLog();
+			master.lock = false;
+			if(master.currentAssignment.isEvaluating()){
+				master.pop();
+				System.out.println(master.getErrorRate() + " => " + CustomLog.getTraffic(true));
+				if(master.evalFinished()){
+					master.currentAssignment.setEvaluating(false);
+					master.lock = false;
+				}
+			}
+			else{
+				printFinalLog();
+				master.lock = false;
+			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

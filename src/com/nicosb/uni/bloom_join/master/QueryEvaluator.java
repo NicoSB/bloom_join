@@ -11,9 +11,9 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import com.nicosb.uni.bloom_join.QueryInformation;
-import com.nicosb.uni.bloom_join.processors.BloomProcessor;
-import com.nicosb.uni.bloom_join.processors.JoinProcessor;
-import com.nicosb.uni.bloom_join.processors.SemiJoinProcessor;
+import com.nicosb.uni.bloom_join.master.processors.BloomProcessor;
+import com.nicosb.uni.bloom_join.master.processors.JoinProcessor;
+import com.nicosb.uni.bloom_join.master.processors.SemiJoinProcessor;
 
 public class QueryEvaluator {
 

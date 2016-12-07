@@ -1,9 +1,9 @@
 package com.nicosb.uni.bloom_join;
 
-import com.nicosb.uni.bloom_join.processors.BloomProcessor;
-import com.nicosb.uni.bloom_join.processors.JoinProcessor;
-import com.nicosb.uni.bloom_join.processors.Processor;
-import com.nicosb.uni.bloom_join.processors.SemiJoinProcessor;
+import com.nicosb.uni.bloom_join.master.processors.BloomProcessor;
+import com.nicosb.uni.bloom_join.master.processors.JoinProcessor;
+import com.nicosb.uni.bloom_join.master.processors.Processor;
+import com.nicosb.uni.bloom_join.master.processors.SemiJoinProcessor;
 
 public class Assignment {
 	public QueryInformation cachedQuery;
@@ -11,6 +11,7 @@ public class Assignment {
 	private SemiJoinProcessor semiJoinProcessor;
 	private JoinProcessor joinProcessor;
 	private BloomInformation bloomInformation;
+	private boolean evaluating = false;
 	private boolean bloom = true;
 	
 	
@@ -70,5 +71,13 @@ public class Assignment {
 	
 	public void setBloomInformation(BloomInformation bloomInformation){
 		this.bloomInformation = bloomInformation;
+	}
+
+	public boolean isEvaluating() {
+		return evaluating;
+	}
+
+	public void setEvaluating(boolean evaluating) {
+		this.evaluating = evaluating;
 	}
 }

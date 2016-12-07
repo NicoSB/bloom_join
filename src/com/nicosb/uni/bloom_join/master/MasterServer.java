@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Scanner;
@@ -33,8 +34,11 @@ public class MasterServer{
 	private HashMap<Integer, ObjectOutputStream> ostreamMap = new HashMap<>();
 	private ResultSet siteTables;
 	private float errorRate = 0.05f;
+	private ArrayList<String> queue = new ArrayList<>();
+	public boolean lock = false;
 	public Assignment currentAssignment;
 	public String latestQuery;
+	final private float[] mEvalPs = {0.9f, 0.5f, 0.1f, 0.05f, 0.01f, 0.005f, 0.001f, 0.0005f, 0.0001f};
 	
 	public MasterServer(){
 		try {
@@ -96,8 +100,23 @@ public class MasterServer{
 		@SuppressWarnings("resource")
 		Scanner s = new Scanner(System.in);
 		while(true){
-			CustomLog.print("psql>>>");
-			latestQuery = s.nextLine().toLowerCase();
+			while(lock){
+				// This is a hotfix, the evaluation would not work as intended without it. 
+				// I actually have no idea why
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if(queue == null || queue.isEmpty()){
+				CustomLog.print("psql>>>");
+				latestQuery = s.nextLine().toLowerCase();
+			}
+			else{
+				latestQuery = queue.get(0);
+			}
 			try {
 				CustomLog.printToConsole=true;
 				CustomLog.printToFile=false;
@@ -108,13 +127,14 @@ public class MasterServer{
 				siteTables = QueryEvaluator.evaluate(currentAssignment.getCachedQuery(), this);
 			} catch (InvalidQueryException e) {
 				CustomLog.println("ERROR: Invalid input!");
+				queue = new ArrayList<>();
 			}
 		}
 	}
 
 		
 	private String applyOptions(String query) {
-		Pattern p = Pattern.compile(" -([ldn]|(p [0-9].[0-9]+))");
+		Pattern p = Pattern.compile(" -([ldn]|(p [0-9].[0-9]+)|(e [a-z]+.log))");
 		Matcher m = p.matcher(query);
 		while(m.find()){
 			String option = m.group();
@@ -124,17 +144,30 @@ public class MasterServer{
 					// log to file
 				case 'l':
 					CustomLog.printToFile = true;
+					lock = true;
 					break;
 					// disable log
 				case 'd':
 					CustomLog.printToConsole = false;
+					lock = true;
 					break;
 					// no bloom
 				case 'n':
 					currentAssignment.setBloom(false);
+					lock = true;
 					break;
 				case 'p':
 					errorRate = Float.valueOf(option.substring(3));
+					lock = true;
+					break;
+				case 'e':
+					for(int i = 0; i < mEvalPs .length; i++){
+						queue.add(latestQuery + " -d -p " + String.valueOf(mEvalPs[i]));
+					}
+					errorRate = mEvalPs[0];
+					CustomLog.printToConsole = false;
+					currentAssignment.setEvaluating(true);
+					lock = true;
 					break;
 			}
 			m = p.matcher(query);
@@ -158,6 +191,14 @@ public class MasterServer{
 	public int getSocketCount() {
 		// TODO Auto-generated method stub
 		return socketMap.size();
+	}
+	
+	public void pop(){
+		queue.remove(0);
+	}
+	
+	public boolean evalFinished(){
+		return queue.isEmpty();
 	}
 	
 	public void sendBloomFilter(byte[] bloomfilter){
@@ -206,6 +247,10 @@ public class MasterServer{
 	}
 	public boolean isBloomed(){
 		return currentAssignment.isBloom();
+	}
+
+	public float getErrorRate() {
+		return errorRate;
 	}
 	
 }
