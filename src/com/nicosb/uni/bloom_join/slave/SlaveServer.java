@@ -143,14 +143,14 @@ public class SlaveServer {
 		String query = (String)TrafficLogger.readObject(input);
 		byte[] bloomRequest = (byte[])TrafficLogger.readObject(input);
 		
-		ArrayList<String> results = new ArrayList<>();
+		ArrayList<Integer> results = new ArrayList<>();
 		
 		if(cache.containsKey(query)){
 			ResultSet cachedRS = cache.get(query);
 			cachedRS.beforeFirst();
 			CustomLog.println(query);
 			while(cachedRS.next()){
-				if(Bloomer.is_in(getStrScore(cachedRS.getString(1)), BitSet.valueOf(bloomRequest), k_c, m_c)) results.add(cachedRS.getString(1));
+				if(Bloomer.is_in(cachedRS.getInt(1), BitSet.valueOf(bloomRequest), k_c, m_c)) results.add(cachedRS.getInt(1));
 			}
 			cache.remove(query);
 		}
@@ -161,7 +161,7 @@ public class SlaveServer {
 
 		String table = query.substring(query.indexOf("FROM ") + "FROM ".length());
 		String attr = query.substring(query.indexOf("DISTINCT ") + "DISTINCT ".length(), query.indexOf("FROM"));
-		String select_query = "SELECT * FROM " + table + " WHERE " + attr + " IN(";
+		String select_query = "SELECT * FROM " + table + " WHERE " + attr + "IN(";
 		
 		for(int i = 0; i < results.size(); i++){
 			select_query += "?,";
@@ -174,7 +174,7 @@ public class SlaveServer {
 		prep = conn.prepareStatement(select_query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		for(int i = 1; i  <= results.size(); i++){
 			//prep.setString(i, results.get(i-1));
-			prep.setInt(i, i-1);
+			prep.setInt(i, results.get(i-1));
 		}			
 		
 		ResultSet rs = prep.executeQuery();

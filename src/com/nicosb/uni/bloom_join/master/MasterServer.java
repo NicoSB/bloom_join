@@ -38,7 +38,7 @@ public class MasterServer{
 	public boolean lock = false;
 	public Assignment currentAssignment;
 	public String latestQuery;
-	final private float[] mEvalPs = {0.9f, 0.5f, 0.1f, 0.05f, 0.01f, 0.005f, 0.001f, 0.0005f, 0.0001f};
+	final private float[] mEvalPs = {0.9f, 0.5f, 0.1f, 0.05f, 0.01f, 0.005f, 0.001f};
 	
 	public MasterServer(){
 		try {
@@ -116,7 +116,7 @@ public class MasterServer{
 				latestQuery = queue.get(0);
 			}
 			try {
-				currentAssignment = new Assignment();
+				currentAssignment = new Assignment(currentAssignment);
 				CustomLog.printToConsole=true;
 				CustomLog.printToFile=false;
 				latestQuery = applyOptions(latestQuery);
@@ -160,6 +160,7 @@ public class MasterServer{
 					lock = true;
 					break;
 				case 'e':
+					latestQuery = latestQuery.substring(0, latestQuery.indexOf("-e"));
 					for(int i = 0; i < mEvalPs .length; i++){
 						queue.add(latestQuery + " -d -p " + String.valueOf(mEvalPs[i]));
 					}

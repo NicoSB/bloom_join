@@ -14,7 +14,9 @@ public class Assignment {
 	private boolean evaluating = false;
 	private boolean bloom = true;
 	
-	
+	public Assignment(Assignment a){
+		if(a != null) this.evaluating = a.isEvaluating();
+	}
 	public QueryInformation getCachedQuery() {
 		return cachedQuery;
 	}

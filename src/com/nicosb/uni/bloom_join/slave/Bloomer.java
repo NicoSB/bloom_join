@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.BitSet;
 import java.util.LinkedList;
 
-import com.nicosb.uni.bloom_join.EnglishNumberToWords;
 
 import util.hash.MurmurHash3;
 
@@ -36,7 +35,7 @@ public class Bloomer{
 
 	private static int hash(String value, int i, int m){
 		if(value != null){
-			return Math.abs(MurmurHash3.murmurhash3_x86_32(value, 0, value.length(), i*i) % m);
+			return Math.abs(MurmurHash3.murmurhash3_x86_32(value, 0, value.length(), 13*i*i) % m);
 		}
 		else{
 			return 0;
@@ -44,9 +43,9 @@ public class Bloomer{
 	}
 
 	private static int hash(int value, int i, int m){
-		byte[] bytes = ByteBuffer.allocate(Integer.SIZE/8).putInt(i).array();
+		byte[] bytes = ByteBuffer.allocate(Integer.SIZE/8).putInt(value).array();
 		if(bytes != null){
-			return Math.abs(MurmurHash3.murmurhash3_x86_32(bytes, 0, bytes.length, i*i) % m);
+			return Math.abs(MurmurHash3.murmurhash3_x86_32(bytes, 0, bytes.length, 13*i*i) % m);
 		}
 		else{
 			return 0;
