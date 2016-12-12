@@ -173,7 +173,8 @@ public class SlaveServer {
 		PreparedStatement prep = conn.prepareStatement(select_query);
 		prep = conn.prepareStatement(select_query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		for(int i = 1; i  <= results.size(); i++){
-			prep.setString(i, results.get(i-1));
+			//prep.setString(i, results.get(i-1));
+			prep.setInt(i, i-1);
 		}			
 		
 		ResultSet rs = prep.executeQuery();
@@ -207,7 +208,8 @@ public class SlaveServer {
 			
 			LinkedList<Integer> int_ll = new LinkedList<>();
 			while(cachedRS.next()){
-				int_ll.add(getStrScore(cachedRS.getString(1)));
+				//int_ll.add(getStrScore(cachedRS.getString(1)));
+				int_ll.add(cachedRS.getInt(1));
 			}
 			BitSet bs = Bloomer.bloom(int_ll, k, m);
 			byte[] b = bs.toByteArray();
