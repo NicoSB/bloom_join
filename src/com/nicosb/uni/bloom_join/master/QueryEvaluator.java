@@ -81,6 +81,7 @@ public class QueryEvaluator {
 		}
 		
 		ResultSet rs = prep.executeQuery();
+		conn.close();
 		return rs;
 	}
 }

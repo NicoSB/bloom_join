@@ -14,6 +14,12 @@ public class Setup {
 				"b BIGINT," + 
 				"c VARCHAR(100)," + 
 				"d BIGINT);";
+		String create_numbers2 = "CREATE TABLE numbers2(" +
+				"id INTEGER UNIQUE," +
+				"a VARCHAR(100)," + 
+				"b BIGINT," + 
+				"c VARCHAR(100)," + 
+				"d BIGINT);";
 		String create_fives = "CREATE TABLE fives(" +
 				"id INTEGER UNIQUE," +
 				"a VARCHAR(100)," + 
@@ -36,14 +42,16 @@ public class Setup {
 			Connection conn = DriverManager.getConnection(url, props);
 		
 			System.out.println("Dropping tables...");
-			
+
 			conn.createStatement().executeUpdate("DROP TABLE IF EXISTS numbers;");
+			conn.createStatement().executeUpdate("DROP TABLE IF EXISTS numbers2;");
 			conn.createStatement().executeUpdate("DROP TABLE IF EXISTS fives;");
 			conn.createStatement().executeUpdate("DROP TABLE IF EXISTS thirteens;");
 
 			System.out.println("Creating tables...");
 
 			conn.createStatement().executeUpdate(create_numbers);
+			conn.createStatement().executeUpdate(create_numbers2);
 			conn.createStatement().executeUpdate(create_fives);
 			conn.createStatement().executeUpdate(create_thirteens);
 
@@ -51,6 +59,20 @@ public class Setup {
 
 			String query = "INSERT INTO numbers(id, a, b, c, d) VALUES (?,?,?,?,?)";
 			PreparedStatement prep = conn.prepareStatement(query);
+			for(long i = 0; i < 10000; i++){
+				prep.setLong(1, i);
+				prep.setString(2, EnglishNumberToWords.convert(i));
+				prep.setLong(3, (i*3));
+				prep.setString(4, EnglishNumberToWords.convert(3*i));
+				prep.setLong(5, i*i);
+				prep.addBatch();
+				prep.clearParameters();
+			}
+			prep.executeBatch();
+			prep.close();
+			
+			query = "INSERT INTO numbers2(id, a, b, c, d) VALUES (?,?,?,?,?)";
+			prep = conn.prepareStatement(query);
 			for(long i = 0; i < 10000; i++){
 				prep.setLong(1, i);
 				prep.setString(2, EnglishNumberToWords.convert(i));

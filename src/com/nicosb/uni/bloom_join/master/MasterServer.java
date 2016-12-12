@@ -38,7 +38,7 @@ public class MasterServer{
 	public boolean lock = false;
 	public Assignment currentAssignment;
 	public String latestQuery;
-	final private float[] mEvalPs = {0.9f, 0.5f, 0.1f, 0.05f, 0.01f, 0.005f, 0.001f};
+	final private float[] mEvalPs = {0.9f, 0.5f, 0.1f, 0.05f, 0.01f, 0.005f, 0.001f, 0.0005f, 0.0001f};
 	
 	public MasterServer(){
 		try {
@@ -49,6 +49,7 @@ public class MasterServer{
 			props.setProperty("password", System.getenv("DB_PASSWORD"));
 			conn = DriverManager.getConnection(url, props);
 			conn.createStatement().executeUpdate("TRUNCATE TABLE sitetables");
+			conn.close();
 			
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -161,12 +162,14 @@ public class MasterServer{
 					break;
 				case 'e':
 					latestQuery = latestQuery.substring(0, latestQuery.indexOf("-e"));
+					errorRate = 1.0f;
+					queue.add(latestQuery + " -d -n");
 					for(int i = 0; i < mEvalPs .length; i++){
-						queue.add(latestQuery + " -d -p " + String.valueOf(mEvalPs[i]));
+						queue.add(String.format(latestQuery + " -d -p %.10f" , mEvalPs[i]));
 					}
-					errorRate = mEvalPs[0];
-					CustomLog.printToConsole = false;
 					currentAssignment.setEvaluating(true);
+					
+					latestQuery = applyOptions(queue.get(0));
 					lock = true;
 					break;
 			}
@@ -238,6 +241,21 @@ public class MasterServer{
 			}
 		}		
 	}
+	
+	public void sendIndices(Integer[] vals) throws SQLException, IOException{
+		siteTables.beforeFirst();
+		while(siteTables.next()){
+			Socket slave = getSocket(siteTables.getInt(1));
+			if(slave != null){
+				ObjectOutputStream out = ostreamMap.get(siteTables.getInt(1));
+				String table = siteTables.getString(2);
+				String attr = currentAssignment.getCachedQuery().getJoinAttributes().get(table);
+				out.writeObject("t;t="+table+"a="+attr);
+				out.writeObject(vals);
+			}
+		}		
+	}
+	
 	public void putOStream(int socketId, ObjectOutputStream objectOutputStream) {
 		ostreamMap.put(socketId, objectOutputStream);
 	}

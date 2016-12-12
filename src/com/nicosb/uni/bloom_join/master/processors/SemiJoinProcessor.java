@@ -21,12 +21,12 @@ public class SemiJoinProcessor extends JoinProcessor {
 			for(RowSet rs: rowSets){
 				jrs.addRowSet(rs, 1);
 			}
-			HashSet<String> hs = new HashSet<>();
+			HashSet<Integer> hs = new HashSet<>();
 			jrs.beforeFirst();
 			while(jrs.next()){
-				hs.add(jrs.getString(1));
+				hs.add(jrs.getInt(1));
 			}
-			String[] vals = new String[hs.size()];
+			Integer[] vals = new Integer[hs.size()];
 			hs.toArray(vals);
 			master.currentAssignment.setBloom(true);
 			master.sendIndices(vals);

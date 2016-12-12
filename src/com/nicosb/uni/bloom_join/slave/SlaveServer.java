@@ -100,7 +100,7 @@ public class SlaveServer {
 
 	private void queryNotBloomed(ObjectInputStream input, String header) {
 		try {
-			String[] vals = (String[])TrafficLogger.readObject(input);
+			Integer[] vals = (Integer[])TrafficLogger.readObject(input);
 			String table = header.substring(header.indexOf("t=")+"t=".length(), header.indexOf("a="));
 			String attr = header.substring(header.indexOf("a=")+"a=".length());
 			String query = "SELECT * FROM " + table + " WHERE " + attr + " IN(";
@@ -116,7 +116,7 @@ public class SlaveServer {
 			PreparedStatement prep = conn.prepareStatement(query);
 			prep = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			for(int i = 1; i  <= vals.length; i++){
-				prep.setString(i, vals[i-1]);
+				prep.setInt(i, Integer.valueOf(vals[i-1]));
 			}	
 
 			ResultSet rs = prep.executeQuery();
@@ -180,6 +180,7 @@ public class SlaveServer {
 		ResultSet rs = prep.executeQuery();
 		CachedRowSetImpl cr = new CachedRowSetImpl();	
 		cr.populate(rs);
+		conn.close();
 		
 		output.writeObject(MasterServer.CHAR_TUPLES+";t="+table);
 		output.writeObject(cr);
