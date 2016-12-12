@@ -1,3 +1,4 @@
+package com.nicosb.uni.bloom_join;
 import java.text.DecimalFormat;
 
 public class EnglishNumberToWords {

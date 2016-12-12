@@ -211,7 +211,7 @@ public class SlaveServer {
 				//int_ll.add(getStrScore(cachedRS.getString(1)));
 				int_ll.add(cachedRS.getInt(1));
 			}
-			BitSet bs = Bloomer.bloom(int_ll, k, m);
+			BitSet bs = Bloomer.bloom_int(int_ll, k, m);
 			byte[] b = bs.toByteArray();
 			output.writeObject("b;t="+table);
 			output.writeObject(b);

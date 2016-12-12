@@ -4,6 +4,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import com.nicosb.uni.bloom_join.EnglishNumberToWords;
+
 public class Setup {
 	public static void main(String[] args){
 		String create_numbers = "CREATE TABLE numbers(" +

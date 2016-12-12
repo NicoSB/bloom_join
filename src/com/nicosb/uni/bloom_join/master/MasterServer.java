@@ -50,8 +50,6 @@ public class MasterServer{
 			conn = DriverManager.getConnection(url, props);
 			conn.createStatement().executeUpdate("TRUNCATE TABLE sitetables");
 			
-			currentAssignment = new Assignment();
-			
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -118,6 +116,7 @@ public class MasterServer{
 				latestQuery = queue.get(0);
 			}
 			try {
+				currentAssignment = new Assignment();
 				CustomLog.printToConsole=true;
 				CustomLog.printToFile=false;
 				latestQuery = applyOptions(latestQuery);
