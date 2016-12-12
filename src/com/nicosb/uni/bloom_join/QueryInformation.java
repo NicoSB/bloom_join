@@ -35,8 +35,8 @@ public class QueryInformation {
 		int index;
 		Pattern p = Pattern.compile("[\\w_]+.[\\w_]+");
 		Matcher m;
-		while((index = attributesSubstring.indexOf("ON ")) != -1){
-			attributesSubstring = attributesSubstring.substring(index + "ON ".length());
+		while((index = attributesSubstring.indexOf("on ")) != -1){
+			attributesSubstring = attributesSubstring.substring(index + "on ".length());
 			m = p.matcher(attributesSubstring); 
 			if(m.find()){
 				String attr = m.group();
@@ -55,13 +55,13 @@ public class QueryInformation {
 
 	private String[] extractTables(String query) {
 		
-		String table1 = query.substring(query.indexOf("FROM ") + "FROM ".length(), query.indexOf("JOIN")).trim();
+		String table1 = query.substring(query.indexOf("from ") + "from ".length(), query.indexOf("join")).trim();
 		String joinSubstring = query;
 		ArrayList<String> join_tables = new ArrayList<>();
 		join_tables.add(table1.toLowerCase());
 		int index;
-		while((index = joinSubstring.indexOf("JOIN ")) != -1){
-			joinSubstring = joinSubstring.substring(index + "JOIN ".length()).trim();
+		while((index = joinSubstring.indexOf("join ")) != -1){
+			joinSubstring = joinSubstring.substring(index + "join ".length()).trim();
 			join_tables.add(joinSubstring.substring(0, joinSubstring.indexOf(" ")));
 			joinSubstring = joinSubstring.substring(joinSubstring.indexOf(" ")).trim();
 		}
@@ -90,12 +90,12 @@ public class QueryInformation {
 		Connection conn = DriverManager.getConnection(url, props);
 			
 		PreparedStatement prep;
-		String query = "SELECT min(count) FROM sitetables WHERE tablename IN (";
+		String query = "SELECT min(sums.s) FROM (SELECT SUM(count) AS s FROM sitetables WHERE tablename IN (";
 		for(int i = 0; i < join_tables.size(); i++){
 			query += "?,";
 		}
 		query = query.substring(0, query.length() - 1);
-		query += ")";
+		query += ") GROUP BY tablename) AS sums";
 		
 		prep = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		

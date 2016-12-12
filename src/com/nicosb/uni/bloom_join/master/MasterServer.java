@@ -95,7 +95,7 @@ public class MasterServer{
 		Scanner s = new Scanner(System.in);
 		while(true){
 			CustomLog.print("psql>>>");
-			latestQuery = s.nextLine();
+			latestQuery = s.nextLine().toLowerCase();
 			try {
 				currentAssignment = new Assignment();
 				CustomLog.printToConsole=true;
