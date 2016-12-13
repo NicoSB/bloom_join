@@ -21,15 +21,30 @@ public class SemiJoinProcessor extends JoinProcessor {
 			for(RowSet rs: rowSets){
 				jrs.addRowSet(rs, 1);
 			}
-			HashSet<Integer> hs = new HashSet<>();
+			HashSet<Integer> hs_int = new HashSet<>();
+			HashSet<String> hs_str = new HashSet<>();
+			
 			jrs.beforeFirst();
+			String type = jrs.getMetaData().getColumnClassName(1);
 			while(jrs.next()){
-				hs.add(jrs.getInt(1));
+				if(type.equals("java.lang.String")){
+					hs_str.add(jrs.getString(1));
+				}
+				else{
+					hs_int.add(jrs.getInt(1));
+				}
 			}
-			Integer[] vals = new Integer[hs.size()];
-			hs.toArray(vals);
+			if(type.equals("java.lang.String")){
+				String[] vals = new String[hs_str.size()];
+				hs_str.toArray(vals);
+				master.sendIndices(vals);
+			}				
+			else{
+				Integer[] vals = new Integer[hs_int.size()];
+				hs_int.toArray(vals);
+				master.sendIndices(vals);
+			}
 			master.currentAssignment.setBloom(true);
-			master.sendIndices(vals);
 		} catch (SQLException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

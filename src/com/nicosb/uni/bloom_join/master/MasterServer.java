@@ -236,7 +236,7 @@ public class MasterServer{
 				ObjectOutputStream out = ostreamMap.get(siteTables.getInt(1));
 				String table = siteTables.getString(2);
 				String attr = currentAssignment.getCachedQuery().getJoinAttributes().get(table);
-				out.writeObject("t;t="+table+"a="+attr);
+				out.writeObject("t;t="+table+"a="+attr+"c=s");
 				out.writeObject(vals);
 			}
 		}		
@@ -250,7 +250,7 @@ public class MasterServer{
 				ObjectOutputStream out = ostreamMap.get(siteTables.getInt(1));
 				String table = siteTables.getString(2);
 				String attr = currentAssignment.getCachedQuery().getJoinAttributes().get(table);
-				out.writeObject("t;t="+table+"a="+attr);
+				out.writeObject("t;t="+table+"a="+attr+"c=i");
 				out.writeObject(vals);
 			}
 		}		

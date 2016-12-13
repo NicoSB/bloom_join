@@ -100,13 +100,23 @@ public class SlaveServer {
 
 	private void queryNotBloomed(ObjectInputStream input, String header) {
 		try {
-			Integer[] vals = (Integer[])TrafficLogger.readObject(input);
 			String table = header.substring(header.indexOf("t=")+"t=".length(), header.indexOf("a="));
-			String attr = header.substring(header.indexOf("a=")+"a=".length());
+			String attr = header.substring(header.indexOf("a=")+"a=".length(),header.indexOf("c="));
+			String type = header.substring(header.indexOf("c=")+"c=".length());
+
+			String[] str_vals = new String[0]; 
+			Integer[] int_vals = new Integer[0];
+			
+			if(type.equals("i")){
+				int_vals = (Integer[])TrafficLogger.readObject(input);
+			}
+			else{
+				str_vals = (String[])TrafficLogger.readObject(input);
+			}
 			String query = "SELECT * FROM " + table + " WHERE " + attr + " IN(";
 			Connection conn = establishDBConnection();	
 			
-			for(int i = 0; i < vals.length; i++){
+			for(int i = 0; i < int_vals.length + str_vals.length; i++){
 				query += "?,";
 			}						
 
@@ -115,8 +125,13 @@ public class SlaveServer {
 			
 			PreparedStatement prep = conn.prepareStatement(query);
 			prep = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-			for(int i = 1; i  <= vals.length; i++){
-				prep.setInt(i, Integer.valueOf(vals[i-1]));
+			for(int i = 1; i  <= int_vals.length + str_vals.length; i++){
+				if(type.equals("i")){
+					prep.setInt(i, Integer.valueOf(int_vals[i-1]));
+				}
+				else{
+					prep.setString(i, str_vals[i-1]);
+				}
 			}	
 
 			ResultSet rs = prep.executeQuery();
@@ -142,15 +157,33 @@ public class SlaveServer {
 		
 		String query = (String)TrafficLogger.readObject(input);
 		byte[] bloomRequest = (byte[])TrafficLogger.readObject(input);
+
+		ArrayList<Integer> int_results = new ArrayList<>();
+		ArrayList<String> str_results = new ArrayList<>();
 		
-		ArrayList<Integer> results = new ArrayList<>();
+		String type = null;
 		
 		if(cache.containsKey(query)){
 			ResultSet cachedRS = cache.get(query);
 			cachedRS.beforeFirst();
+			type = cachedRS.getMetaData().getColumnClassName(1);
 			CustomLog.println(query);
 			while(cachedRS.next()){
-				if(Bloomer.is_in(cachedRS.getInt(1), BitSet.valueOf(bloomRequest), k_c, m_c)) results.add(cachedRS.getInt(1));
+				int val;
+				if(type.equals("java.lang.String")){
+					val = getStrScore(cachedRS.getString(1));
+				}
+				else{
+					val = cachedRS.getInt(1);
+				}
+				if(Bloomer.is_in(val, BitSet.valueOf(bloomRequest), k_c, m_c)){
+					if(type.equals("java.lang.String")){
+						str_results.add(cachedRS.getString(1));
+					}
+					else{
+						int_results.add(val);
+					}
+				}
 			}
 			cache.remove(query);
 		}
@@ -163,7 +196,7 @@ public class SlaveServer {
 		String attr = query.substring(query.indexOf("DISTINCT ") + "DISTINCT ".length(), query.indexOf("FROM"));
 		String select_query = "SELECT * FROM " + table + " WHERE " + attr + "IN(";
 		
-		for(int i = 0; i < results.size(); i++){
+		for(int i = 0; i < str_results.size() + int_results.size(); i++){
 			select_query += "?,";
 		}						
 
@@ -172,9 +205,13 @@ public class SlaveServer {
 		
 		PreparedStatement prep = conn.prepareStatement(select_query);
 		prep = conn.prepareStatement(select_query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-		for(int i = 1; i  <= results.size(); i++){
-			//prep.setString(i, results.get(i-1));
-			prep.setInt(i, results.get(i-1));
+		for(int i = 1; i  <= str_results.size() + int_results.size(); i++){
+			if(type.equals("java.lang.String")){
+				prep.setString(i, str_results.get(i-1));
+			}
+			else{
+				prep.setInt(i, int_results.get(i-1));
+			}
 		}			
 		
 		ResultSet rs = prep.executeQuery();
@@ -207,10 +244,16 @@ public class SlaveServer {
 			ResultSet cachedRS = prep.executeQuery();
 			cache.put(query, cachedRS);
 			
+			String type = cachedRS.getMetaData().getColumnClassName(1);
+
 			LinkedList<Integer> int_ll = new LinkedList<>();
 			while(cachedRS.next()){
-				//int_ll.add(getStrScore(cachedRS.getString(1)));
-				int_ll.add(cachedRS.getInt(1));
+				if(type.equals("java.lang.String")){
+					int_ll.add(getStrScore(cachedRS.getString(1)));
+				}
+				else{
+					int_ll.add(cachedRS.getInt(1));
+				}
 			}
 			BitSet bs = Bloomer.bloom_int(int_ll, k, m);
 			byte[] b = bs.toByteArray();
