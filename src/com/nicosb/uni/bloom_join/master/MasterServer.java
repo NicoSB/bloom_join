@@ -1,5 +1,9 @@
 package com.nicosb.uni.bloom_join.master;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
@@ -35,10 +39,12 @@ public class MasterServer{
 	private ResultSet siteTables;
 	private float errorRate = 0.05f;
 	private ArrayList<String> queue = new ArrayList<>();
+	private Scanner s = new Scanner(System.in);
 	public boolean lock = false;
 	public Assignment currentAssignment;
 	public String latestQuery;
-	final private float[] mEvalPs = {0.9f, 0.5f, 0.1f, 0.05f, 0.01f, 0.005f, 0.001f, 0.0005f, 0.0001f};
+	final private float[] mEvalPs = {0.05f, 0.01f, 0.005f, 0.001f, 0.0005f, 0.0001f, 0.00005f, 0.00001f};
+	private BufferedReader mBufferedReader = null;
 	
 	public MasterServer(){
 		try {
@@ -61,7 +67,7 @@ public class MasterServer{
 		
 	}
 	
-	public void run(String hostName, int port) {
+	public void run(String hostName, int port) throws IOException, InvalidQueryException {
 		try {
 			@SuppressWarnings("resource")
 			ServerSocket masterSocket = new ServerSocket(port);
@@ -96,8 +102,6 @@ public class MasterServer{
 			e.printStackTrace();
 		}
 
-		@SuppressWarnings("resource")
-		Scanner s = new Scanner(System.in);
 		while(true){
 			while(lock){
 				// This is a hotfix, the evaluation would not work as intended without it. 
@@ -111,7 +115,22 @@ public class MasterServer{
 			}
 			if(queue == null || queue.isEmpty()){
 				CustomLog.print("psql>>>");
-				latestQuery = s.nextLine().toLowerCase();
+				if(mBufferedReader != null){
+					String line;
+					if((line = mBufferedReader.readLine()) != null){
+						latestQuery = line;
+						System.out.println(line);
+						QueryInformation qi = new QueryInformation(line.substring(0, line.indexOf("-") - 1));
+						System.out.println(qi.getMaxJoinSize());
+					}
+					else{
+						mBufferedReader = null;
+						latestQuery = s.nextLine().toLowerCase();
+					}
+				}
+				else{
+					latestQuery = s.nextLine().toLowerCase();
+				}
 			}
 			else{
 				latestQuery = queue.get(0);
@@ -134,7 +153,7 @@ public class MasterServer{
 
 		
 	private String applyOptions(String query) {
-		Pattern p = Pattern.compile(" -([ldn]|(p [0-9].[0-9]+)|(e [a-z]+.log))");
+		Pattern p = Pattern.compile(" -([ldn]|(p [0-9].[0-9]+)|(e( [a-z]+\\.sql)?))");
 		Matcher m = p.matcher(query);
 		while(m.find()){
 			String option = m.group();
@@ -161,6 +180,17 @@ public class MasterServer{
 					lock = true;
 					break;
 				case 'e':
+					if(option.contains(".sql")){
+						String file = option.substring(4);
+						File f = new File(file);
+						try {
+							FileReader fr = new FileReader(file);
+							mBufferedReader = new BufferedReader(fr);
+						} catch (FileNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
 					latestQuery = latestQuery.substring(0, latestQuery.indexOf("-e"));
 					errorRate = 1.0f;
 					queue.add(latestQuery + " -d -n");
@@ -169,6 +199,14 @@ public class MasterServer{
 					}
 					currentAssignment.setEvaluating(true);
 					
+
+				try {
+					QueryInformation qi = new QueryInformation(latestQuery);
+					queue.add(String.format(latestQuery + " -d -p %.10f" , 1.0f/(qi.getMaxJoinSize()*10)));				
+				} catch (InvalidQueryException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 					latestQuery = applyOptions(queue.get(0));
 					lock = true;
 					break;

@@ -126,7 +126,7 @@ public class QueryInformation {
 		this.joinAttributes = joinAttributes;
 	}
 
-	public int getMaxJoinSize(QueryInformation qi) {
+	public int getMaxJoinSize() {
 		return maxJoinSize;
 	}
 	

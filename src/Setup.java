@@ -59,7 +59,10 @@ public class Setup {
 
 			String query = "INSERT INTO numbers(id, a, b, c, d) VALUES (?,?,?,?,?)";
 			PreparedStatement prep = conn.prepareStatement(query);
-			for(long i = 0; i < 10000; i++){
+			
+			final int max = 5000;
+			
+			for(long i = 0; i < max; i++){
 				prep.setLong(1, i);
 				prep.setString(2, EnglishNumberToWords.convert(i));
 				prep.setLong(3, (i*3));
@@ -73,7 +76,7 @@ public class Setup {
 			
 			query = "INSERT INTO numbers2(id, a, b, c, d) VALUES (?,?,?,?,?)";
 			prep = conn.prepareStatement(query);
-			for(long i = 0; i < 10000; i++){
+			for(long i = 0; i < max; i++){
 				prep.setLong(1, i);
 				prep.setString(2, EnglishNumberToWords.convert(i));
 				prep.setLong(3, (i*3));
@@ -87,7 +90,7 @@ public class Setup {
 			
 			query = "INSERT INTO fives(id, a, b, c, d) VALUES (?,?,?,?,?)";
 			prep = conn.prepareStatement(query);
-			for(long i = 0; i < 10000; i+=5){
+			for(long i = 0; i < max; i+=5){
 				prep.setLong(1, i);
 				prep.setString(2, EnglishNumberToWords.convert(i));
 				prep.setLong(3, (i*3));
@@ -101,7 +104,7 @@ public class Setup {
 			
 			query = "INSERT INTO thirteens(id, a, b, c, d) VALUES (?,?,?,?,?)";
 			prep = conn.prepareStatement(query);
-			for(long i = 0; i < 10000; i+=13){
+			for(long i = 0; i < max; i+=13){
 				prep.setLong(1, i);
 				prep.setString(2, EnglishNumberToWords.convert(i));
 				prep.setLong(3, (i*3));

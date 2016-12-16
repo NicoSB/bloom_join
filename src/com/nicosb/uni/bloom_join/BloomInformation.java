@@ -5,7 +5,7 @@ public class BloomInformation {
 	private int m;
 	
 	public BloomInformation(QueryInformation qi, float error_rate){
-		this(qi.getMaxJoinSize(qi), error_rate);
+		this(qi.getMaxJoinSize(), error_rate);
 		// TODO actually calculate the set size
 	}	
 

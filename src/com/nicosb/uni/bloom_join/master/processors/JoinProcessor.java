@@ -26,8 +26,7 @@ public class JoinProcessor extends BasicJoinProcessor{
 			master.lock = false;
 			if(master.currentAssignment.isEvaluating()){
 				master.pop();
-//				System.out.println(master.getErrorRate() + " => " + CustomLog.getTraffic(true));
-				System.out.println(CustomLog.getTraffic(true));
+				System.out.println(master.getErrorRate() + "\t" + CustomLog.getTraffic(true));
 				if(master.evalFinished()){
 					master.currentAssignment.setEvaluating(false);
 					master.lock = false;
