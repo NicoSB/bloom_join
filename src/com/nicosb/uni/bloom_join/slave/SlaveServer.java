@@ -168,20 +168,24 @@ public class SlaveServer {
 			cachedRS.beforeFirst();
 			type = cachedRS.getMetaData().getColumnClassName(1);
 			CustomLog.println(query);
+			
+			int i = Integer.MIN_VALUE;
+			String s = null;
+			
 			while(cachedRS.next()){
-				int val;
 				if(type.equals("java.lang.String")){
-					val = getStrScore(cachedRS.getString(1));
+					s = cachedRS.getString(1);
 				}
 				else{
-					val = cachedRS.getInt(1);
+					i = cachedRS.getInt(1);
 				}
-				if(Bloomer.is_in(val, BitSet.valueOf(bloomRequest), k_c, m_c)){
+				if((i != Integer.MIN_VALUE && Bloomer.is_in(i, BitSet.valueOf(bloomRequest), k_c, m_c)) ||
+						(s != null && Bloomer.is_in(s, BitSet.valueOf(bloomRequest), k_c, m_c))){
 					if(type.equals("java.lang.String")){
-						str_results.add(cachedRS.getString(1));
+						str_results.add(s);
 					}
 					else{
-						int_results.add(val);
+						int_results.add(i);
 					}
 				}
 			}
@@ -247,15 +251,24 @@ public class SlaveServer {
 			String type = cachedRS.getMetaData().getColumnClassName(1);
 
 			LinkedList<Integer> int_ll = new LinkedList<>();
+			LinkedList<String> str_ll = new LinkedList<>();
+			
 			while(cachedRS.next()){
 				if(type.equals("java.lang.String")){
-					int_ll.add(getStrScore(cachedRS.getString(1)));
+					str_ll.add(cachedRS.getString(1));
 				}
 				else{
 					int_ll.add(cachedRS.getInt(1));
 				}
 			}
-			BitSet bs = Bloomer.bloom_int(int_ll, k, m);
+			
+			BitSet bs;
+			if(type.equals("java.lang.String")){
+				bs = Bloomer.bloom_str(str_ll, k, m);
+			}
+			else{
+				bs = Bloomer.bloom_int(int_ll, k, m);
+			}
 			byte[] b = bs.toByteArray();
 			output.writeObject("b;t="+table);
 			output.writeObject(b);

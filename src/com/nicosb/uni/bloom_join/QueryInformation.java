@@ -33,7 +33,7 @@ public class QueryInformation {
 		HashMap<String, String> attrs = new HashMap<>();
 		String attributesSubstring = query;
 		int index;
-		Pattern p = Pattern.compile("[\\w_]+.[\\w_]+");
+		Pattern p = Pattern.compile("[\\w_]+\\.[\\w_]+");
 		Matcher m;
 		while((index = attributesSubstring.indexOf("on ")) != -1){
 			attributesSubstring = attributesSubstring.substring(index + "on ".length());

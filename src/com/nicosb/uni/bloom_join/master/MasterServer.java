@@ -151,6 +151,8 @@ public class MasterServer{
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} catch (Exception e){
+				e.printStackTrace();
 			}
 		}
 	}
