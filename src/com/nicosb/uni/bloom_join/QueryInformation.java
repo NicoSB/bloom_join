@@ -113,6 +113,7 @@ public class QueryInformation {
 		ResultSet rs = prep.executeQuery();
 		rs.first();
 		maxJoinSize = rs.getInt(1);
+		conn.close();
 	}
 
 	private String tablesAreRegistered(Connection conn, ArrayList<String> tables) throws SQLException{
