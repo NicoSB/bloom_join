@@ -53,7 +53,7 @@ public class QueryInformation {
 		return attrs;
 	}
 
-	private String[] extractTables(String query) {
+	private String[] extractTables(String query) throws InvalidQueryException {
 		
 		String table1 = query.substring(query.indexOf("from ") + "from ".length(), query.indexOf("join")).trim();
 		String joinSubstring = query;
@@ -80,7 +80,7 @@ public class QueryInformation {
 		return ret;
 	}
 
-	private void calculateMaxJoinSize(ArrayList<String> join_tables) throws ClassNotFoundException, SQLException {
+	private void calculateMaxJoinSize(ArrayList<String> join_tables) throws ClassNotFoundException, SQLException, InvalidQueryException {
 		Class.forName("org.postgresql.Driver");
 		String url = "jdbc:postgresql://localhost/bloom_join";
 		Properties props = new Properties();
@@ -88,7 +88,12 @@ public class QueryInformation {
 		props.setProperty("password", System.getenv("DB_PASSWORD"));
 			
 		Connection conn = DriverManager.getConnection(url, props);
-			
+		String check = tablesAreRegistered(conn, join_tables);
+		if(check.length() > 0){
+			throw new InvalidQueryException(check + " is not registered!");
+		}
+		
+		
 		PreparedStatement prep;
 		String query = "SELECT min(sums.s) FROM (SELECT SUM(count) AS s FROM sitetables WHERE tablename IN (";
 		for(int i = 0; i < join_tables.size(); i++){
@@ -110,6 +115,19 @@ public class QueryInformation {
 		maxJoinSize = rs.getInt(1);
 	}
 
+	private String tablesAreRegistered(Connection conn, ArrayList<String> tables) throws SQLException{
+		String query = "SELECT * FROM sitetables WHERE tablename = ?";
+		PreparedStatement prep = conn.prepareStatement(query);
+		
+		for(String t: tables){
+			prep.setString(1, t);
+			ResultSet rs = prep.executeQuery();
+			if(!rs.next()){
+				return t;
+			}
+		}
+		return "";
+	}
 	public String[] getTables() {
 		return tables;
 	}

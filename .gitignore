@@ -1,3 +1,4 @@
 bin/
 .classpath
 bin/com/nicosb/uni/bloom_join/MasterServer.class
+queries.sql

@@ -1,7 +1,6 @@
 package com.nicosb.uni.bloom_join.master;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -43,7 +42,7 @@ public class MasterServer{
 	public boolean lock = false;
 	public Assignment currentAssignment;
 	public String latestQuery;
-	final private float[] mEvalPs = {0.05f, 0.01f, 0.005f, 0.001f, 0.0005f, 0.0001f, 0.00005f, 0.00001f};
+	final private float[] mEvalPs = {0.05f, 0.01f, 0.005f, 0.001f, 0.0005f, 0.0001f};
 	private BufferedReader mBufferedReader = null;
 	
 	public MasterServer(){
@@ -67,7 +66,7 @@ public class MasterServer{
 		
 	}
 	
-	public void run(String hostName, int port) throws IOException, InvalidQueryException {
+	public void run(String hostName, int port){
 		try {
 			@SuppressWarnings("resource")
 			ServerSocket masterSocket = new ServerSocket(port);
@@ -113,29 +112,30 @@ public class MasterServer{
 					e.printStackTrace();
 				}
 			}
-			if(queue == null || queue.isEmpty()){
-				CustomLog.print("psql>>>");
-				if(mBufferedReader != null){
-					String line;
-					if((line = mBufferedReader.readLine()) != null){
-						latestQuery = line;
-						System.out.println(line);
-						QueryInformation qi = new QueryInformation(line.substring(0, line.indexOf("-") - 1));
-						System.out.println(qi.getMaxJoinSize());
+
+			try {
+				if(queue == null || queue.isEmpty()){
+					CustomLog.print("psql>>>", true);
+					if(mBufferedReader != null){
+						String line;
+						if((line = mBufferedReader.readLine()) != null){
+							latestQuery = line;
+							System.out.println(line);
+							QueryInformation qi = new QueryInformation(line.substring(0, line.indexOf("-") - 1));
+							System.out.println(qi.getMaxJoinSize());
+						}
+						else{
+							mBufferedReader = null;
+							latestQuery = s.nextLine().toLowerCase();
+						}
 					}
 					else{
-						mBufferedReader = null;
 						latestQuery = s.nextLine().toLowerCase();
 					}
 				}
 				else{
-					latestQuery = s.nextLine().toLowerCase();
+					latestQuery = queue.get(0);
 				}
-			}
-			else{
-				latestQuery = queue.get(0);
-			}
-			try {
 				currentAssignment = new Assignment(currentAssignment);
 				CustomLog.printToConsole=true;
 				CustomLog.printToFile=false;
@@ -145,14 +145,19 @@ public class MasterServer{
 				currentAssignment.setCachedQuery(qi);
 				siteTables = QueryEvaluator.evaluate(currentAssignment.getCachedQuery(), this);
 			} catch (InvalidQueryException e) {
-				CustomLog.println("ERROR: Invalid input!");
+				CustomLog.println("ERROR: Invalid input!", true);
+				CustomLog.println(e.getMessage());
+				lock = false;
 				queue = new ArrayList<>();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}
 
 		
-	private String applyOptions(String query) {
+	private String applyOptions(String query) throws InvalidQueryException {
 		Pattern p = Pattern.compile(" -([ldn]|(p [0-9].[0-9]+)|(e( [a-z]+\\.sql)?))");
 		Matcher m = p.matcher(query);
 		while(m.find()){
@@ -182,7 +187,6 @@ public class MasterServer{
 				case 'e':
 					if(option.contains(".sql")){
 						String file = option.substring(4);
-						File f = new File(file);
 						try {
 							FileReader fr = new FileReader(file);
 							mBufferedReader = new BufferedReader(fr);
@@ -199,14 +203,10 @@ public class MasterServer{
 					}
 					currentAssignment.setEvaluating(true);
 					
-
-				try {
 					QueryInformation qi = new QueryInformation(latestQuery);
-					queue.add(String.format(latestQuery + " -d -p %.10f" , 1.0f/(qi.getMaxJoinSize()*10)));				
-				} catch (InvalidQueryException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+					queue.add(String.format(latestQuery + " -d -p %.10f" , 1.0f/(qi.getMaxJoinSize())));
+					queue.add(String.format(latestQuery + " -d -p %.10f" , 1.0f/(qi.getMaxJoinSize()*1.1f)));
+					queue.add(String.format(latestQuery + " -d -p %.10f" , 1.0f/(qi.getMaxJoinSize()*10)));						
 					latestQuery = applyOptions(queue.get(0));
 					lock = true;
 					break;
