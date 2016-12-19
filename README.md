@@ -7,7 +7,7 @@ It conceptually implements bloom filters in a distributed database system to red
 
 ## Installation
 
-To start the system, the .jar files must be launched. However, before following Environment Variables must be set:
+To start the system, the .jar files must be launched. Beforehand, following Environment Variables must be set:
 
 DB_USER - the username for the PostgreSQL database
 
@@ -19,8 +19,10 @@ java -jar master.jar
 The master server is started on port 63843
 
 ```
-java -jar master.jar [port] [tables...]
+java -jar slave.jar [port] [tables...]
 ```
+
+The server must provide a database called bloom_join.
 
 ## Usage
 
@@ -33,5 +35,10 @@ On the master's terminal, the queries can be entered with different launch optio
 -n: disable the bloom filter. The query will be run with a normal semi-join
 -p [0.[0-9]+]: The query will be run with the provided false positive probability
 ```
+Example:
+```
+SELECT * FROM fives JOIN thirteens ON fives.id = thirteens.id -p 0.05 -l -d
+```
+
 ## Further remarks
 The system can only deal with Integer and String attributes.
