@@ -19,7 +19,7 @@ java -jar master.jar
 The master server is started on port 63843
 
 ```
-java -jar master.jar [port] [tables...]
+java -jar slave.jar [port] [tables...]
 ```
 
 ## Usage
