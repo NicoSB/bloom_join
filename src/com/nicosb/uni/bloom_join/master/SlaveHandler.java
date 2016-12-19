@@ -15,6 +15,12 @@ import com.nicosb.uni.bloom_join.CustomLog;
 import com.nicosb.uni.bloom_join.TrafficLogger;
 import com.sun.rowset.CachedRowSetImpl;
 
+/**
+ * Manages the relationship to slave servers
+ * 
+ * @author Nico
+ *
+ */
 public class SlaveHandler implements Runnable {
 	private Socket slaveSocket;
 	private MasterServer master;

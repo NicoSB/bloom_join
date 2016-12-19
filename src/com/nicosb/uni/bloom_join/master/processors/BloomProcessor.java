@@ -3,6 +3,14 @@ package com.nicosb.uni.bloom_join.master.processors;
 import java.util.ArrayList;
 import java.util.BitSet;
 
+/**
+ * 
+ * BloomProcessor provides the processor for Bloomfilters. This includes the two combine functions:
+ * - ORJoin for combining filters of the same table
+ * - ANDJoin for combining filters of different tables
+ * @author Nico
+ *
+ */
 public class BloomProcessor implements Processor {
 	private ArrayList<ArrayList<Integer>> requestList = new ArrayList<>();
 	private ArrayList<String> indices = new ArrayList<>();

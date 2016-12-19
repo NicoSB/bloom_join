@@ -157,7 +157,13 @@ public class MasterServer{
 		}
 	}
 
-		
+	/**
+	 * reads and applies the options given with the query
+	 *  
+	 * @param query: the query inclusive options 
+	 * @return the query without options
+	 * @throws InvalidQueryException
+	 */
 	private String applyOptions(String query) throws InvalidQueryException {
 		Pattern p = Pattern.compile(" -([ldn]|(p [0-9].[0-9]+)|(e( [a-z]+\\.sql)?))");
 		Matcher m = p.matcher(query);
@@ -227,7 +233,6 @@ public class MasterServer{
 	}
 
 	public int getSocketCount() {
-		// TODO Auto-generated method stub
 		return socketMap.size();
 	}
 	
@@ -239,6 +244,10 @@ public class MasterServer{
 		return queue.isEmpty();
 	}
 	
+	/**
+	 * sends the given bloom filter to all concerned sites
+	 * @param bloomfilter the bloomfilter to be transmitted
+	 */
 	public void sendBloomFilter(byte[] bloomfilter){
 		try {
 			siteTables.beforeFirst();
@@ -263,6 +272,12 @@ public class MasterServer{
 		}
 	}
 
+	/**
+	 * sends the indices to all concerned sites
+	 * @param vals String indices
+	 * @throws SQLException
+	 * @throws IOException
+	 */
 	public void sendIndices(String[] vals) throws SQLException, IOException{
 		siteTables.beforeFirst();
 		while(siteTables.next()){
@@ -277,6 +292,12 @@ public class MasterServer{
 		}		
 	}
 	
+	/**
+	 * sends the indices to all concerned sites
+	 * @param vals Integer indices
+	 * @throws SQLException
+	 * @throws IOException
+	 */
 	public void sendIndices(Integer[] vals) throws SQLException, IOException{
 		siteTables.beforeFirst();
 		while(siteTables.next()){

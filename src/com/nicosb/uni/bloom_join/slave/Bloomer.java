@@ -8,6 +8,14 @@ import java.util.LinkedList;
 import util.hash.MurmurHash3;
 
 
+/**
+ * Bloomer handles everything concerning bloom filters. This includes:
+ * - Hashing strings/integers with Murmur3 functions
+ * - Probing a value against the bloom filter
+ * 
+ * @author Nico
+ *
+ */
 public class Bloomer{
 
 	public static BitSet bloom_str(LinkedList<String> strings, int k, int m){

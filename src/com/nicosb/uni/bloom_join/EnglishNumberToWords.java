@@ -1,6 +1,11 @@
 package com.nicosb.uni.bloom_join;
 import java.text.DecimalFormat;
 
+/**
+* This Program will display the given number in words from 0 to 999999999
+* @author Manoj Kumar Dunna
+* Mail Id : manojdunna@gmail.com
+**/
 public class EnglishNumberToWords {
 
   private static final String[] tensNames = {

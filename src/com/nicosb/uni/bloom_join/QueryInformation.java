@@ -14,6 +14,13 @@ import java.util.regex.Pattern;
 import com.nicosb.uni.bloom_join.exception.InvalidQueryException;
 import com.nicosb.uni.bloom_join.master.QueryValidator;
 
+/**
+ * QueryInformation stores valuable information about the query, 
+ * namely the concerned tables and join attributes, as well as the maximum join size
+ * 
+ * @author Nico
+ *
+ */
 public class QueryInformation {
 	private String[] tables;
 	private HashMap<String, String> joinAttributes;
@@ -29,6 +36,13 @@ public class QueryInformation {
 		}
 	}
 
+	/**
+	 * extracts the tables from a given query
+	 * 
+	 * @param query the query to be evaluated
+	 * @return A HashMap containing the table as key and the attribute as value
+	 * 
+	 */
 	private HashMap<String, String> extractJoinAttributes(String query) {
 		HashMap<String, String> attrs = new HashMap<>();
 		String attributesSubstring = query;
@@ -53,33 +67,55 @@ public class QueryInformation {
 		return attrs;
 	}
 
+	/**
+	 * 
+	 * Extracts the tables from a given query
+	 * @param query the query to be evaluated
+	 * @return A string array containing all tables mentioned in the query
+	 * @throws InvalidQueryException
+	 * 
+	 */
 	private String[] extractTables(String query) throws InvalidQueryException {
 		
 		String table1 = query.substring(query.indexOf("from ") + "from ".length(), query.indexOf("join")).trim();
 		String joinSubstring = query;
 		ArrayList<String> join_tables = new ArrayList<>();
 		join_tables.add(table1.toLowerCase());
+		
 		int index;
+		
+		// Parse join tables
 		while((index = joinSubstring.indexOf("join ")) != -1){
 			joinSubstring = joinSubstring.substring(index + "join ".length()).trim();
 			join_tables.add(joinSubstring.substring(0, joinSubstring.indexOf(" ")));
 			joinSubstring = joinSubstring.substring(joinSubstring.indexOf(" ")).trim();
 		}
-		
 		try {
 			calculateMaxJoinSize(join_tables);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		String[] ret = new String[join_tables.size()];
 		join_tables.toArray(ret);
 		return ret;
 	}
 
+	/**
+	 * 
+	 * Calculates the maximum join size. 
+	 * Basically, it sums up the sizes for each table and returns the smalles value.
+	 * 
+	 * This is due to the fact, that the maximal number of values stored in the joined bloom filter
+	 * is equal to the size of the smallest relation
+	 * 
+	 * @param join_tables an arraylist containing the names of every table used in the query.
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 * @throws InvalidQueryException
+	 */
 	private void calculateMaxJoinSize(ArrayList<String> join_tables) throws ClassNotFoundException, SQLException, InvalidQueryException {
 		Class.forName("org.postgresql.Driver");
 		String url = "jdbc:postgresql://localhost/bloom_join";
@@ -116,6 +152,18 @@ public class QueryInformation {
 		conn.close();
 	}
 
+	/**
+	 * Checks whether all tables given are registered by a site.
+	 * Therefore, the method queries all tables from the relation "sitetables"
+	 * which contains all table-site pairs.
+	 * 
+	 * @param conn The database connection
+	 * @param tables ArrayList containing all tables to be checked.
+	 * @return the name of the first table that is missing OR
+	 * an empty string if all tables are registered.
+	 * 
+	 * @throws SQLException
+	 */
 	private String tablesAreRegistered(Connection conn, ArrayList<String> tables) throws SQLException{
 		String query = "SELECT * FROM sitetables WHERE tablename = ?";
 		PreparedStatement prep = conn.prepareStatement(query);
@@ -129,6 +177,7 @@ public class QueryInformation {
 		}
 		return "";
 	}
+	
 	public String[] getTables() {
 		return tables;
 	}

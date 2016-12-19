@@ -6,6 +6,12 @@ import java.util.HashMap;
 import com.nicosb.uni.bloom_join.CustomLog;
 import com.nicosb.uni.bloom_join.master.MasterServer;
 
+/**
+ * Provides the processor that joins the actual tuples in the last phase. 
+ * Furthermore, it prints the final log.
+ * @author Nico
+ *
+ */
 public class JoinProcessor extends BasicJoinProcessor{
 
 	public JoinProcessor(HashMap<String, String> joinAttrs, String query, MasterServer master, String[] tables) {
@@ -42,6 +48,13 @@ public class JoinProcessor extends BasicJoinProcessor{
 		}
 	}
 	
+	/**
+	 * The final log is always printed to the console, unless the "-e" is activated
+	 * This method prints the executed query, the needed traffic and the tuples 
+	 * if the console output is not disabled.
+	 * 
+	 * @throws SQLException
+	 */
 	private void printFinalLog() throws SQLException {
 		CustomLog.println("--------------------------------", true);
 		CustomLog.println("|"+currentQuery+"|", true);

@@ -15,8 +15,27 @@ import com.nicosb.uni.bloom_join.master.processors.BloomProcessor;
 import com.nicosb.uni.bloom_join.master.processors.JoinProcessor;
 import com.nicosb.uni.bloom_join.master.processors.SemiJoinProcessor;
 
+/**
+ * 
+ * QueryEvaluator provides methods for the evaluation phase:
+ * - fetches the contents of the sitetables relation
+ * - initializes the processors
+ * - computes the SELECT DISTINCT queries
+ * - provides information for the Assignment
+ * 
+ * @author Nico
+ *
+ */
 public class QueryEvaluator {
 
+	/**
+	 * Activates the needed processors based on the given query information
+	 * and transmits the SELECT DISTINCT queries to the slave servers
+	 * 
+	 * @param qi QueryInformation 
+	 * @param master the requesting master server
+	 * @return the ResultSet containing all sites and their tables
+	 */
 	public static ResultSet evaluate(QueryInformation qi, MasterServer master){
 		try {
 			ResultSet rs = getSitetables(qi);
@@ -58,6 +77,14 @@ public class QueryEvaluator {
 		
 	}
 
+	/**
+	 * fetches the contents from the sitetables
+	 * 
+	 * @param qi queryinformation
+	 * @return the ResultSet containing all sites and their tables
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
 	private static ResultSet getSitetables(QueryInformation qi) throws ClassNotFoundException, SQLException {
 		Class.forName("org.postgresql.Driver");
 		String url = "jdbc:postgresql://localhost/bloom_join";

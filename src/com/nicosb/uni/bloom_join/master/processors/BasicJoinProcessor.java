@@ -65,6 +65,14 @@ public class BasicJoinProcessor implements Processor {
 		return -1;
 	}
 	
+	/**
+	 * 
+	 * adds a rowset to the processor
+	 * 
+	 * @param table
+	 * @param serverId
+	 * @param crsi
+	 */
 	public void addRowSet(String table, int serverId, CachedRowSetImpl crsi){
 		boolean finished = removeRequested(table, serverId);
 		int index = getIndex(table);

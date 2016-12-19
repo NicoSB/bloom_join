@@ -5,6 +5,13 @@ import com.nicosb.uni.bloom_join.master.processors.JoinProcessor;
 import com.nicosb.uni.bloom_join.master.processors.Processor;
 import com.nicosb.uni.bloom_join.master.processors.SemiJoinProcessor;
 
+/**
+ * The Assignment class represents the server's current assignment. It stores crucial information and objects,
+ * such as information about the query and bloomfilter, as well as the processors needed in further steps
+ * 
+ * @author Nico
+ *
+ */
 public class Assignment {
 	public QueryInformation cachedQuery;
 	private BloomProcessor activeProcessor;
