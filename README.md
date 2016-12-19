@@ -35,5 +35,10 @@ On the master's terminal, the queries can be entered with different launch optio
 -n: disable the bloom filter. The query will be run with a normal semi-join
 -p [0.[0-9]+]: The query will be run with the provided false positive probability
 ```
+Example:
+```
+SELECT * FROM fives JOIN thirteens -p 0.05 -l -d
+```
+
 ## Further remarks
 The system can only deal with Integer and String attributes.
