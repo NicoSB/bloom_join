@@ -1,4 +1,4 @@
-# Bloom Fitlers in a master slave architecture
+# Bloom Filters in a master slave architecture
 
 ## Introduction
 
