@@ -37,7 +37,7 @@ On the master's terminal, the queries can be entered with different launch optio
 ```
 Example:
 ```
-SELECT * FROM fives JOIN thirteens -p 0.05 -l -d
+SELECT * FROM fives JOIN thirteens ON fives.id = thirteens.id -p 0.05 -l -d
 ```
 
 ## Further remarks
