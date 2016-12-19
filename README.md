@@ -22,6 +22,8 @@ The master server is started on port 63843
 java -jar slave.jar [port] [tables...]
 ```
 
+The server must provide a table called bloom_join.
+
 ## Usage
 
 On the master's terminal, the queries can be entered with different launch options:
