@@ -7,7 +7,7 @@ It conceptually implements bloom filters in a distributed database system to red
 
 ## Installation
 
-To start the system, the .jar files must be launched. However, before following Environment Variables must be set:
+To start the system, the .jar files must be launched. Beforehand, following Environment Variables must be set:
 
 DB_USER - the username for the PostgreSQL database
 
@@ -22,7 +22,7 @@ The master server is started on port 63843
 java -jar slave.jar [port] [tables...]
 ```
 
-The server must provide a table called bloom_join.
+The server must provide a database called bloom_join.
 
 ## Usage
 
