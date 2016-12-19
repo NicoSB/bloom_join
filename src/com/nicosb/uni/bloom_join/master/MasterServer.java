@@ -42,7 +42,7 @@ public class MasterServer{
 	public boolean lock = false;
 	public Assignment currentAssignment;
 	public String latestQuery;
-	final private float[] mEvalPs = {0.05f, 0.01f, 0.005f, 0.001f, 0.0005f, 0.0001f};
+	final private float[] mEvalPs = {0.5f, 0.4f, 0.3f, 0.2f, 0.1f, 0.075f, 0.05f, 0.01f, 0.005f};
 	private BufferedReader mBufferedReader = null;
 	
 	public MasterServer(){
@@ -92,7 +92,7 @@ public class MasterServer{
 				}
 			};
 			
-			new Thread(new ConnectionListener(this)).start();;
+			new Thread(new ConnectionListener(this)).start();
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -203,11 +203,7 @@ public class MasterServer{
 						queue.add(String.format(latestQuery + " -d -p %.10f" , mEvalPs[i]));
 					}
 					currentAssignment.setEvaluating(true);
-					
-					QueryInformation qi = new QueryInformation(latestQuery);
-					queue.add(String.format(latestQuery + " -d -p %.10f" , 1.0f/(qi.getMaxJoinSize())));
-					queue.add(String.format(latestQuery + " -d -p %.10f" , 1.0f/(qi.getMaxJoinSize()*1.1f)));
-					queue.add(String.format(latestQuery + " -d -p %.10f" , 1.0f/(qi.getMaxJoinSize()*10)));						
+						
 					latestQuery = applyOptions(queue.get(0));
 					lock = true;
 					break;

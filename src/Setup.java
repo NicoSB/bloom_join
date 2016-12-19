@@ -60,7 +60,7 @@ public class Setup {
 			String query = "INSERT INTO numbers(id, a, b, c, d) VALUES (?,?,?,?,?)";
 			PreparedStatement prep = conn.prepareStatement(query);
 			
-			final int max = 5000;
+			final int max = 20000;
 			
 			for(long i = 0; i < max; i++){
 				prep.setLong(1, i);
